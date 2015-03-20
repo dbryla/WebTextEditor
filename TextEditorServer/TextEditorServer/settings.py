@@ -36,7 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles'
 )
 
 JENKINS_TASKS = (
@@ -48,7 +48,7 @@ JENKINS_TASKS = (
 )
 
 PROJECT_APPS = (
-	'server',
+	'server'
 )
 
 MIDDLEWARE_CLASSES = (
