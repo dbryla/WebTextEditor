@@ -10,7 +10,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from mongoengine import *
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DATABASES_NAME = 'local'
 
 
 # Quick-start development settings - unsuitable for production
@@ -36,7 +38,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'mongoengine.django.mongo_auth'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,10 +62,22 @@ WSGI_APPLICATION = 'TextEditorServer.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.dummy'
     }
 }
+AUTHENTICATION_BACKENDS = (
+    'mongoengine.django.auth.MongoEngineBackend',
+)
+
+AUTH_USER_MODEL = 'mongo_auth.MongoUser'
+
+MONGOENGINE_USER_DOCUMENT = 'mongoengine.django.auth.User'
+
+SESSION_ENGINE = 'mongoengine.django.sessions'
+
+SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
+
+connect(DATABASES_NAME)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
