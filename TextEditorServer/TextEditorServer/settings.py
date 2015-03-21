@@ -48,7 +48,7 @@ JENKINS_TASKS = (
 )
 
 PROJECT_APPS = (
-	'server'
+	'server',
 )
 
 MIDDLEWARE_CLASSES = (
