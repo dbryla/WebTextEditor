@@ -40,7 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mongoengine.django.mongo_auth',
-    'django_socketio'
+    'django_socketio',
+    'BackendService'
 )
 
 MIDDLEWARE_CLASSES = (
