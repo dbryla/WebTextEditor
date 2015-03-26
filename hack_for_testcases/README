@@ -1,0 +1,3 @@
+To enable tests on mongodb database replace your django.test.testcases with this version.
+
+WARNING! This hack will corrupt your django files and future testcases on relational databases may not work!
