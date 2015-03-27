@@ -1,0 +1,8 @@
+    Django==1.6.1
+    django-jenkins
+    django-socketio==0.3.8
+    gevent==0.13.6
+    gevent-socketio==0.2.1
+    gevent-websocket==0.2.3
+    greenlet==0.4.5
+    mongoengine

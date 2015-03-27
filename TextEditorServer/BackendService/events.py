@@ -8,6 +8,7 @@ ID = "551482d5d426876d362e8fd0"
 
 @events.on_message(channel="^document-")
 def message(request, socket, context, message):
+	#for now it should be hardcoded for id='551347a1489f70f38ddb5126' or name='global'
 	document = get_document_or_404(Document, id=message["id"])
 	operation = message["op"]
 	if operation["type"] == INSERT:
