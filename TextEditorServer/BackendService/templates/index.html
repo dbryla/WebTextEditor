@@ -1,0 +1,17 @@
+<head>
+ {% load socketio_tags %}
+ {% socketio %}
+ <script>
+ //example usege
+ var socket = new io.Socket();
+ socket.connect();
+ socket.on('connect', function() {
+ 	socket.subscribe('document-global');
+ 	message = {id : '551347a1489f70f38ddb5126', op : { type :"i", text : "text", pos : 3}};
+ 	socket.send(message);
+ });
+ socket.on('message', function(data) {
+ 	console.log('recieved message '+data.action);
+ });
+ </script>
+</head>

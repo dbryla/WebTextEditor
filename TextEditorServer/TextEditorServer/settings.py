@@ -81,12 +81,18 @@ SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
 
 connect(DATABASES_NAME)
 
+TEMPLATE_DIRS = (BASE_DIR + '/BackendService/templates',)
+TEMPLATE_LOADERS = (
+ 'django.template.loaders.filesystem.Loader',
+ 'django.template.loaders.app_directories.Loader',
+)
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Poland'
 
 USE_I18N = True
 
