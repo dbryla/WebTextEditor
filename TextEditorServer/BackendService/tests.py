@@ -6,27 +6,29 @@ from mongoengine.django.shortcuts import get_document_or_404
 from mongoengine.context_managers import switch_db
 from django.http import Http404
 from bson.errors import InvalidId
-
+from db_manager import *
+import datetime
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
 SAMPLE_TEXT = 'Użytkownik może wyświetlić i modyfikować dokument z jego zawartością.'
+DOC_NAME = 'TestDocument'
 
 class TestEnv(TestCase):
 
 	def testBaseDir(self):
 		self.assertTrue(BASE_DIR.endswith('TextEditorServer'))
-                                                      
+
 class TestDB(TestCase):
 
 	def setUp(self):
 		register_connection(DB_ALIAS, 'test')
 
 	def testGetDocumentOr404(self):
-		documentName = 'TestDocument'
 		with switch_db(Doc, DB_ALIAS) as Docx:
-			Docx(name=documentName, text=SAMPLE_TEXT).save()
-			self.assertTrue(get_document_or_404(Doc, name=documentName).name == documentName)
+			Docx(name=DOC_NAME, text=SAMPLE_TEXT).save()
+			self.assertTrue(get_document_or_404(Doc, name=DOC_NAME).name == DOC_NAME)
 		with self.assertRaisesMessage(Http404, 'No Document matches the given query.'):
 			get_document_or_404(Doc, name='not_exisitng')
 
@@ -37,7 +39,7 @@ class TestDB(TestCase):
 			with self.assertRaisesMessage(ValidationError, '(Document:None) (StringField only accepts string values: [\'name\'])'):
 				Docx(name=1).save()
 			with self.assertRaisesMessage(InvalidId, '\'piec\' is not a valid ObjectId, it must be a 12-byte input of type \'str\' or a 24-character hex string'):
-				Docx(id='piec', name='test').save()
+				Docx(id='piec', name='DOC_NAME').save()
 
 	#test global document from story 1
 	def testGlobalDocument(self):
@@ -49,8 +51,45 @@ class TestDB(TestCase):
 
 class TestDBManager(TestCase):
 
+	def setUp(self):
+		register_connection(DB_ALIAS, 'test')
+
 	def testInsertText(self):
-		pass
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			creation_date = doc.last_change
+			insert_text(doc, 'A', 3)
+			doc = Docx.objects(name=DOC_NAME)[0]
+			self.assertTrue(creation_date < doc.last_change)
+			self.assertTrue(doc.text[3] == 'A')
+			Docx.drop_collection()
+			doc = Docx(name=DOC_NAME, text="").save()
+			insert_text(doc, 'k', 0)
+			insert_text(doc, 'o', 0)
+			self.assertTrue(Docx.objects(name=DOC_NAME)[0].text == 'ok')
 
 	def testRemoveText(self):
-		pass
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			creation_date = doc.last_change
+			remove_text(doc, 'Uzytkownik', 0)
+			doc = Docx.objects(name=DOC_NAME)[0]
+			self.assertTrue(creation_date < doc.last_change)
+			self.assertTrue(doc.text[0] == ' ')
+			Docx.drop_collection()
+			doc = Docx(name=DOC_NAME, text="ok").save()
+			remove_text(doc, 'o', 0)
+			remove_text(doc, 'k', 0)
+			self.assertTrue(Docx.objects(name=DOC_NAME)[0].text == '')
+
+	def testPolishCharacters(self):
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			creation_date = doc.last_change
+			remove_text(doc, 'Użytkownik', 0)
+			doc = Docx.objects(name=DOC_NAME)[0]
+			self.assertTrue(doc.text[0] == ' ')
+
+	def tearDown(self):
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			Docx.drop_collection()
