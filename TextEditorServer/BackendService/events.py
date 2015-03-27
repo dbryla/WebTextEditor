@@ -4,6 +4,7 @@ from db_manager import *
 
 INSERT = 'i'
 REMOVE = 'r'
+ID = "551482d5d426876d362e8fd0"
 
 @events.on_message(channel="^document-")
 def message(request, socket, context, message):
