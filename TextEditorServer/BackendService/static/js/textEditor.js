@@ -1,5 +1,14 @@
 $(document).ready( function() {
 
+	String.prototype.insert = function (index, string) {
+		if (index > 0) {
+			return this.substring(0, index) + string + this.substring(index, this.length);
+		}
+		else {
+			return string + this;
+		}
+	};
+
 	var socket = new io.Socket();
 	var documentId = '551347a1489f70f38ddb5126';
 	socket.connect();
@@ -7,8 +16,24 @@ $(document).ready( function() {
 		socket.subscribe('document-global');
 	});
 	socket.on('message', function(data) {
-		console.log('recieved message ' + data.action + 'with content: ' + data.text);
-		$('.webDocument').html(data.text);
+		if (data.action === 'doc') {
+			$('.webDocument').html(data.text);
+		} else if (data.action === 'msg') {
+			operation = data.op;
+			text = operation.text;
+			pos = operation.pos;
+			currentContent = $('.webDocument').html();
+			if (operation.type === 'i') {
+				console.log(currentContent);
+				currentContent = currentContent.insert(pos, text);
+				console.log(currentContent);
+				$('.webDocument').html(currentContent);
+				console.log($('.webDocument').html());
+			} else if (operation.type === 'r') {
+				length = text.length
+				$('.webDocument').html(currentContent.substring(0, pos) + currentContent.substring(pos + length, currentContent.length));
+			}
+		}
 	});
 
 	$('.webDocument').keypress(function(e) {
