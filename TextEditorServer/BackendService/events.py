@@ -26,6 +26,9 @@ def message(request, socket, context, message):
 		remove_text(document, operation["text"], operation["pos"])
 
 	message["action"] = "msg"
+	print 'dupa';
+	print message;
+	print 'dupa';
 	socket.broadcast_channel(message)
 
 
