@@ -15,19 +15,18 @@ function onEditorLoad() {
 }
 
 function onKeyHandler(event) {
-	if (parent.document2body.innerHTML === '') {
-		document2body.innerHTML = '<p></br></p>';
-	}
 	var keyCode = event.keyCode;
+		
 	switch(keyCode) {
 		case (8) : {
-/*			if (parent.document2body.innerHTML ===  "<p><br></p>") {
-				return false;
-			} else {
-				return true;
-			}*/
+			
+			if ( parent.document2body.innerHTML === '<p><br></p>' ) {
+				event.preventDefault();
+			}
 		}
 	}
 
-	//handleKey(keyCode, document2body);
+	if (parent.document2body.innerHTML === '' || parent.document2body.innerHTML === '<br>' ) {
+		parent.document2body.innerHTML = '<p></br></p>';
+	}
 }
