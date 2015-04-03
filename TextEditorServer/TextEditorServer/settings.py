@@ -105,3 +105,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+import logging
+LOG_LEVEL = "DEBUG"
+log_handler = logging.FileHandler('server.log')
+log_handler.setFormatter(logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+db_logger = logging.getLogger('db_manager')
+db_logger.addHandler(log_handler)
+db_logger.setLevel(LOG_LEVEL)
+events_logger = logging.getLogger('events')
+events_logger.addHandler(log_handler)
+events_logger.setLevel(LOG_LEVEL)
