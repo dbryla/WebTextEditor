@@ -16,17 +16,22 @@ function onEditorLoad() {
 
 function onKeyHandler(event) {
 	var keyCode = event.keyCode;
-		
 	switch(keyCode) {
 		case (8) : {
-			
-			if ( parent.document2body.innerHTML === '<p><br></p>' ) {
-				event.preventDefault();
+
+		}
+		default : {
+			if (parent.document2body.innerHTML === '<br>') {
+				parent.document2body.innerHTML = '<p></p>';
 			}
 		}
 	}
+}
 
-	if (parent.document2body.innerHTML === '' || parent.document2body.innerHTML === '<br>' ) {
-		parent.document2body.innerHTML = '<p></br></p>';
-	}
+function insertAtCaret(areaId,text) {
+    var txtarea = document2body;
+    var img = document2.createElement('img');
+    img.src = '../img/emotikon.jpeg';
+    txtarea.appendChild(img);
+    return false;
 }
