@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'mongoengine.django.mongo_auth',
     'django_socketio',
-    'BackendService'
+    'EditorApp'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -81,7 +81,7 @@ SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
 
 connect(DATABASES_NAME)
 
-TEMPLATE_DIRS = (BASE_DIR + '/BackendService/templates',)
+TEMPLATE_DIRS = (BASE_DIR + '/EditorApp/templates',)
 TEMPLATE_LOADERS = (
  'django.template.loaders.filesystem.Loader',
  'django.template.loaders.app_directories.Loader',
