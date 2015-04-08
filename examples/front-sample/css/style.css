@@ -1,6 +1,20 @@
-textarea {
-    height: 800px;
-    width: 600px;
+iframe#editorContent { 
+	box-sizing: border-box; 
+	-moz-box-sizing: border-box; 
+	width: 600px; 
+	height: 800px; 
+	border: solid 1px #7F9DB9; 
+	overflow: auto; 
+	margin: 0px; 
+	visibility: hidden ;
+    resize: horizontal;
+    padding: 7px;
+    white-space: nowrap ;
+    word-wrap: break-word; /* Internet Explorer 5.5+ */ 
+}
+
+#p {
+    white-space: nowrap ;
 }
 
 #textarea {
@@ -33,4 +47,12 @@ input {
     margin-top: 5px;
     padding: 2px 3px;
     width: 598px;    
+}
+
+.wordwrap {
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */ 
 }
