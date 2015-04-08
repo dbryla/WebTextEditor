@@ -1,0 +1,4 @@
+To run example, first install wrapper for google api:
+pip install PyDrive
+Then:
+python quickstart.py
