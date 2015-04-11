@@ -130,11 +130,11 @@ $(document).ready( function() {
 	    	var index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
 	    	var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length)
 		    if (key.length == 1) {
+		    	var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
 		    	if (changeLength < 1) {
    				    bodyBeforeOperation = editorBody.innerHTML;
    				    return;
-		    	} else if (changeLength > 1) {
-		    		var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
+		    	} else if (changeLength > 1 && text !== '</p>') {		    		
 		    		message = {id : documentId, op : { type :"r", text : text, pos : index}};
 		    		console.log('Sending remove message: ' + text + ' on pos: ' + index);
 		    		socket.send(message);
@@ -144,7 +144,7 @@ $(document).ready( function() {
 		    	socket.send(message);
 		    } else if (key === 'Enter') {
 		    	console.log('enter');
-		    	if (changeLength > '</p><p>'.length) {
+		    	if (changeLength > '</p><p><br>'.length) {
 		    		var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
 		    		message = {id : documentId, op : { type :"r", text : text, pos : index}};
 		    		console.log('Sending remove message: ' + text + ' on pos: ' + index);
