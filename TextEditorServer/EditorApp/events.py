@@ -1,5 +1,5 @@
 from django_socketio import events
-from mongoengine.django.shortcuts import get_document_or_404
+from mongoengine.django.shortcuts import get_document_or_404, get_list_or_404
 from db_manager import *
 from models import Document
 import logging
@@ -24,15 +24,26 @@ def connect(request, socket, context, channel):
 @events.on_message(channel="^document-")
 def message(request, socket, context, message):
 	logger.info("Received message: " + str(message))
-	document = get_document_or_404(Document, id= ID)
-	operation = message["op"]
-	if operation["type"] == INSERT:
-		insert_text(document, operation["text"], operation["pos"])
-	elif operation["type"] == REMOVE:
-		remove_text(document, operation["text"], operation["pos"])
+	if message["action"] == "msg":
+		document = get_document_or_404(Document, id= ID)
+		operation = message["op"]
+		if operation["type"] == INSERT:
+			insert_text(document, operation["text"], operation["pos"])
+		elif operation["type"] == REMOVE:
+			remove_text(document, operation["text"], operation["pos"])
+		socket.broadcast_channel(message)
 
-	message["action"] = "msg"
-	socket.broadcast_channel(message)
+	elif message["action"] == "list":
+		documents_list = get_list_or_404(Document)
+		message["files"] = []
+		for document in documents_list:
+			element = {}
+			element["id"] = document["id"]
+			element["name"] = document["name"]
+			message["files"].append(element)
+		socket.send(message)
+
+		
 
 @events.on_connect
 def socket_connect(request, socket, context):
