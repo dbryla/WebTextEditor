@@ -35,3 +35,21 @@ function insertAtCaret(areaId,text) {
     txtarea.appendChild(img);
     return false;
 }
+
+function fillCell(table, targetRow, targetCell, fillContents) {
+	var tableObj = document.getElementById(table);
+	var selectedRow = tableObj.rows[targetRow-1];
+
+	var selectedCell = selectedRow.cells[targetCell-1];
+	selectedCell.innerHTML = fillContents;
+}
+
+function selectDocument(e) {
+	var currentRow = $(e).closest('tr');
+	var selectedFileName = currentRow.get(0).cells.item(0).getAttribute('value');
+	if (selectedFileName != null) {
+		document.getElementById('fileName').value = selectedFileName;
+	}
+	$('#fileListModal').trigger('reveal:close');
+
+}
