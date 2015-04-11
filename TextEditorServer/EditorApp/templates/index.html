@@ -1,83 +1,115 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Web Text Editor - global</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="" />
-		<meta name="copyright" content="" />
-		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}KS/css/kickstart.css" media="all" />
-		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}KS/style.css" media="all" />    
-		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/style.css">
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-		<script type="text/javascript" src="{{STATIC_URL}}KS/js/kickstart.js"></script>
-		<script type="text/javascript" src="{{STATIC_URL}}js/editor.js"></script>
+<head>
+	<title>Web Text Editor</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta name="description" content="" />
+	<meta name="copyright" content="" />
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}KS/css/kickstart.css" media="all" />
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}KS/style.css" media="all" />    
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/style.css">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}KS/js/kickstart.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/editor.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/jquery-migrate-1.2.1.min.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/jquery.reveal.js"></script>
 
-		{% load socketio_tags %}
-		{% socketio %}
+	<style type="text/css">
+	body { font-family: "HelveticaNeue","Helvetica-Neue", "Helvetica", "Arial", sans-serif; }
+	.big-link { display:block; margin-top: 100px; text-align: center; font-size: 70px; color: #06f; }
+	</style>
 
-		<!--<script type="text/javascript" src="{{STATIC_URL}}js/textEditor.js"></script>-->
+	{% load socketio_tags %}
+	{% socketio %}
 
-		<script type="text/javascript" charset="utf-8">
-			var imageAdder = function(){
-				var emoticon = document.getElementById('emoticons');
-				
-				emoticon.onclick = 	function(){
-						var content = document.getElementById('textarea');
-						var img = document.createElement('img')
-						img.src = '{{STATIC_URL}}img/emotikon.jpeg';
-						content.appendChild(img);
-						return false;
-				} 
-			}
+	<script type="text/javascript" charset="utf-8">
+	var imageAdder = function(){
+		var emoticon = document.getElementById('emoticons');
 
-				
-			window.onload = function(){
-				imageAdder();
-			}
-		</script>
-	</head>
-	<body>
-		<!-- Menu Horizontal -->
-		<ul id="menu" class="menu">
-			<li><a><span class="icon"></span>File</a>
-				<ul>
-					<li><a><i class="fa fa-upload"></i> Upload</a></li>
-					<li><a><i class="fa fa-download"></i> Download as...</a>
-						<ul>
-							<li><a><i class="fa fa-file-pdf-o"></i>PDF</a></li>
-							<li><a><i class="fa fa-file-word-o"></i> ODT</a></li>
-						</ul>
-					</li>
-					<li><a><i >Share </i></a></li>
-				</ul>
-			</li>
-			<li><a><span class="icon"></span>Edit</a>
-				<ul>
-					<li><a><i class="fa fa-clipboard"></i> Paste</a></li>
-					<li><a><i class="fa fa-download"></i> Cut</a></li>
-					<li><a><i class="fa fa-files-o"></i> Copy</a></li> 
-				</ul>
-			</li>
-		</ul>
+		emoticon.onclick = 	function(){
+			var content = document.getElementById('textarea');
+			var img = document.createElement('img')
+			img.src = '{{STATIC_URL}}img/emotikon.jpeg';
+			content.appendChild(img);
+			return false;
+		} 
+	}
 
-		<li class="button" id="emoticons"><i class="fa fa-smile-o"></i><a>Emoticons</a></li>
 
-		<ul class="button-bar">
-			<li><a><i class="fa fa-bold"></i></a></li>
-			<li><a><i class="fa fa-italic"></i> </a></li>
-			<li><a><i class="fa fa-underline"></i> </a></li>
-			<li><a><i class="fa fa-link"></i></a></li>
-			<li><a><i class="fa fa-floppy-o"></i></a></li>
-			<li><a><i class="fa fa-font"></i></a></li>
-			<li><a><i class="fa fa-align-left"></i></a></li>
-			<li><a><i class="fa fa-align-right"></i></a></li>
-			<li><a><i class="fa fa-align-justify"></i></a></li>
-		</ul>
-		<div>
-			<iframe id="editorContent" name="editorContent" src="{{STATIC_URL}}html/textbox.html" width="100%" height="380" frameborder="0" style="height: 460px; visibility: inherit;">
-			</iframe>
-		</div>
+	window.onload = function(){
+		imageAdder();
+	}
+	</script>
+</head>
+<body>
+	<!-- Menu Horizontal -->
+	<ul id="menu" class="menu">
+		<li><a><span class="icon"></span>File</a>
+			<ul>
+				<li><a><i class="fa fa-upload"></i> Upload</a></li>
+				<li><a><i class="fa fa-download"></i> Download as...</a>
+					<ul>
+						<li><a><i class="fa fa-file-pdf-o"></i>PDF</a></li>
+						<li><a><i class="fa fa-file-word-o"></i> ODT</a></li>
+					</ul>
+				</li>
+				<li><a href="#" data-reveal-id="fileListModal" data-animation="none"><i class="fa fa-list-alt"></i>Documents list</a></li>
+				<li><a href=""><i >Share </i></a></li>
+			</ul>
+		</li>
+		<li><a><span class="icon"></span>Edit</a>
+			<ul>
+				<li><a><i class="fa fa-clipboard"></i> Paste</a></li>
+				<li><a><i class="fa fa-download"></i> Cut</a></li>
+				<li><a><i class="fa fa-files-o"></i> Copy</a></li> 
+			</ul>
+		</li>
+	</ul>
 
-	</body>
+	<li class="button" id="emoticons"><i class="fa fa-smile-o"></i><a>Emoticons</a></li>
+
+	<ul class="button-bar">
+		<li><a><i class="fa fa-bold"></i></a></li>
+		<li><a><i class="fa fa-italic"></i> </a></li>
+		<li><a><i class="fa fa-underline"></i> </a></li>
+		<li><a><i class="fa fa-link"></i></a></li>
+		<li><a><i class="fa fa-floppy-o"></i></a></li>
+		<li><a><i class="fa fa-font"></i></a></li>
+		<li><a><i class="fa fa-align-left"></i></a></li>
+		<li><a><i class="fa fa-align-right"></i></a></li>
+		<li><a><i class="fa fa-align-justify"></i></a></li>
+	</ul>
+	<label for="fileName">File name</label>
+	<input id="fileName" type="text" />
+	<br/>
+	<div>
+		<iframe id="editorContent" name="editorContent" src="{{STATIC_URL}}html/textbox.html" width="100%" height="380" frameborder="0" style="height: 460px; visibility: inherit;">
+		</iframe>
+	</div>
+	<div id="fileListModal" class="reveal-modal">
+		<h3>Select file from list</h3>
+		<table class="sortable" cellspacing="0" cellpadding="0">
+			<thead><tr>
+				<th>File name</th>
+				<th>Actions</th>
+			</tr></thead>
+			<tbody><tr>
+				<td>cosiek1</td>
+				<td><a href="#" onclick="selectDocument(this);return false;"><i class="fa fa-check-circle"></i></a></td>
+			</tr><tr>
+			<td>cosiek2</td>
+			<td><a href="#" onclick="selectDocument(this);return false;"><i class="fa fa-check-circle"></i></a></td>
+		</tr><tr>
+		<td>cosiek3</td>
+		<td><a href="#" onclick="selectDocument(this);return false;"><i class="fa fa-check-circle"></i></a></td>
+	</tr><tr>
+	<td>cosiek4</td>
+	<td><a href="#" onclick="selectDocument(this);return false;"><i class="fa fa-check-circle"></i></a></td>
+</tr></tbody>
+</table>
+</div>
+
+</body>
 </html>

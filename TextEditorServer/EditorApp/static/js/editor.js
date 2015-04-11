@@ -20,11 +20,29 @@ $(document).ready( function() {
 	}
 
 	function insertAtCaret(areaId,text) {
-	    var txtarea = editorBody;
-	    var img = editorDocument.createElement('img');
-	    img.src = '../img/emotikon.jpeg';
-	    txtarea.appendChild(img);
-	    return false;
+		var txtarea = editorBody;
+		var img = editorDocument.createElement('img');
+		img.src = '../img/emotikon.jpeg';
+		txtarea.appendChild(img);
+		return false;
+	}
+
+	function fillCell(table, targetRow, targetCell, fillContents) {
+		var tableObj = document.getElementById(table);
+		var selectedRow = tableObj.rows[targetRow-1];
+
+		var selectedCell = selectedRow.cells[targetCell-1];
+		selectedCell.innerHTML = fillContents;
+	}
+
+	function selectDocument(e) {
+		var currentRow = $(e).closest('tr');
+		var selectedFileName = currentRow.get(0).cells.item(0).getAttribute('value');
+		if (selectedFileName != null) {
+			document.getElementById('fileName').value = selectedFileName;
+		}
+		$('#fileListModal').trigger('reveal:close');
+
 	}
 
 	function handleKey(keyCode, body) {
@@ -49,15 +67,15 @@ $(document).ready( function() {
 	};
 
 	String.prototype.indexOfFirstDifference = function(s, caseInsensitive){
-      var l = this.length, i=-1;
-      while(++i<l){
-        if (!s[i]) {return i}
-        var diff = caseInsensitive 
-                   ? this[i].toUpperCase() !== s[i].toUpperCase() 
-                   : this[i] !== s[i];
-        if ( diff ) {  return i; }
-      }
-      return s.length>l ? l : null;
+		var l = this.length, i=-1;
+		while(++i<l){
+			if (!s[i]) {return i}
+				var diff = caseInsensitive 
+			? this[i].toUpperCase() !== s[i].toUpperCase() 
+			: this[i] !== s[i];
+			if ( diff ) {  return i; }
+		}
+		return s.length>l ? l : null;
 	};
 
 
@@ -68,7 +86,7 @@ $(document).ready( function() {
 
 		editorDocument = editorIframe.document;
 		var div = editorDocument.createElement('p');
-		div.innerHTML = 'Here you can put your text :)'
+		div.innerHTML = 'Here you can put your text :)';
 		editorBody = editorDocument.getElementById('editorBody');
 		editorBody.innerHTML = '<p></br></p>';
 		console.log('Iframe editorContent successfully loaded');
@@ -123,53 +141,51 @@ $(document).ready( function() {
 		$(editorDocument).on('keyup', function(event) {
 			console.log('Old body: ' + bodyBeforeOperation);
 			console.log('Current body: ' + editorBody.innerHTML);
-		    console.log('Pressed key in frame: ' + event.key);
-		    console.log(event);
-		    console.log('Selected text: ' + editorIframe.getSelection());
-		    var key = event.key;
-	    	var index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
-	    	var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length)
-		    if (key.length == 1) {
-		    	var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
-		    	if (changeLength < 1) {
-   				    bodyBeforeOperation = editorBody.innerHTML;
-   				    return;
-		    	} else if (changeLength > 1 && text !== '</p>') {		    		
-		    		message = {id : documentId, op : { type :"r", text : text, pos : index}};
-		    		console.log('Sending remove message: ' + text + ' on pos: ' + index);
-		    		socket.send(message);
-		    	}
-		    	message = {id : documentId, op : { type :"i", text : key, pos : index}};
-		    	console.log('Sending insert message: ' + key + ' on pos: ' + index);
-		    	socket.send(message);
-		    } else if (key === 'Enter') {
-		    	console.log('enter');
-		    	if (changeLength > '</p><p><br>'.length) {
-		    		var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
-		    		message = {id : documentId, op : { type :"r", text : text, pos : index}};
-		    		console.log('Sending remove message: ' + text + ' on pos: ' + index);
-		    		socket.send(message);
-		    	}
-		    	message = {id : documentId, op : { type :"i", text : '</p><p>', pos : index}};
-		    	console.log('Sending insert message: ' + key + ' on pos: ' + index);
-		    	socket.send(message);
-		    } else if (key === 'Backspace') {
-		    	console.log('backspace');
-		    	var text = bodyBeforeOperation.substring(index, index + changeLength);
-		    	message = {id : documentId, op : { type :"r", text : text, pos : index}};
-		    	console.log('Sending remove message: ' + text + ' on pos: ' + index);
-		    	socket.send(message);
-		    } else if (key === 'Delete') {
-		    	console.log('delete');
-		    	var text = bodyBeforeOperation.substring(index, index + changeLength);
-		    	message = {id : documentId, op : { type :"r", text : text, pos : index}};
-		    	console.log('Sending remove message: ' + text + ' on pos: ' + index);
-		    	socket.send(message);
-		    }
-		    bodyBeforeOperation = editorBody.innerHTML;
+			console.log('Pressed key in frame: ' + event.key);
+			console.log(event);
+			console.log('Selected text: ' + editorIframe.getSelection());
+			var key = event.key;
+			var index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
+			var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length)
+			if (key.length == 1) {
+				var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
+				if (changeLength < 1) {
+					bodyBeforeOperation = editorBody.innerHTML;
+					return;
+				} else if (changeLength > 1 && text !== '</p>') {		    		
+					message = {id : documentId, op : { type :"r", text : text, pos : index}};
+					console.log('Sending remove message: ' + text + ' on pos: ' + index);
+					socket.send(message);
+				}
+				message = {id : documentId, op : { type :"i", text : key, pos : index}};
+				console.log('Sending insert message: ' + key + ' on pos: ' + index);
+				socket.send(message);
+			} else if (key === 'Enter') {
+				console.log('enter');
+				if (changeLength > '</p><p><br>'.length) {
+					var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
+					message = {id : documentId, op : { type :"r", text : text, pos : index}};
+					console.log('Sending remove message: ' + text + ' on pos: ' + index);
+					socket.send(message);
+				}
+				message = {id : documentId, op : { type :"i", text : '</p><p>', pos : index}};
+				console.log('Sending insert message: ' + key + ' on pos: ' + index);
+				socket.send(message);
+			} else if (key === 'Backspace') {
+				console.log('backspace');
+				var text = bodyBeforeOperation.substring(index, index + changeLength);
+				message = {id : documentId, op : { type :"r", text : text, pos : index}};
+				console.log('Sending remove message: ' + text + ' on pos: ' + index);
+				socket.send(message);
+			} else if (key === 'Delete') {
+				console.log('delete');
+				var text = bodyBeforeOperation.substring(index, index + changeLength);
+				message = {id : documentId, op : { type :"r", text : text, pos : index}};
+				console.log('Sending remove message: ' + text + ' on pos: ' + index);
+				socket.send(message);
+			}
+			bodyBeforeOperation = editorBody.innerHTML;
 		});
 	});
-
-
 
 });
