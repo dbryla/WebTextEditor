@@ -5,19 +5,6 @@ $(document).ready( function() {
 	var editorBody;
 	var socket;
 
-	function onKeyHandler(event) {
-		var keyCode = event.keyCode;
-		switch(keyCode) {
-			case (8) : {
-
-			}
-			default : {
-				if (parent.editorBody.innerHTML === '<br>') {
-					parent.editorBody.innerHTML = '<p></p>';
-				}
-			}
-		}
-	}
 
 	function insertAtCaret(areaId,text) {
 		var txtarea = editorBody;
@@ -43,18 +30,6 @@ $(document).ready( function() {
 		}
 		$('#fileListModal').trigger('reveal:close');
 
-	}
-
-	function handleKey(keyCode, body) {
-		switch(keyCode) {
-			case (8) : {
-				if (body.innerHTML ===  "<p><br/></p>") {
-					return false;
-				} else {
-					return true;
-				}
-			}
-		}
 	}
 
 	String.prototype.insert = function (index, string) {
@@ -131,12 +106,6 @@ $(document).ready( function() {
 				}
 			}
 		});
-		selectedText = 0;
-
-		$(editorDocument).keypress(function(event) {
-			selectedText = editorDocument.getSelection();
-			console.log('selectionRange = ' + selectedText);
-		});
 
 		$(editorDocument).on('keyup', function(event) {
 			console.log('Old body: ' + bodyBeforeOperation);
@@ -172,11 +141,15 @@ $(document).ready( function() {
 				console.log('Sending insert message: ' + key + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Backspace') {
-				console.log('backspace');
-				var text = bodyBeforeOperation.substring(index, index + changeLength);
-				message = {id : documentId, op : { type :"r", text : text, pos : index}};
-				console.log('Sending remove message: ' + text + ' on pos: ' + index);
-				socket.send(message);
+				if (editorBody.innerHTML === '' || editorBody.innerHTML === '<br>' ) {
+					editorBody.innerHTML = '<p></br></p>';
+				} else {
+					console.log('backspace');
+					var text = bodyBeforeOperation.substring(index, index + changeLength);
+					message = {id : documentId, op : { type :"r", text : text, pos : index}};
+					console.log('Sending remove message: ' + text + ' on pos: ' + index);
+					socket.send(message);
+				}
 			} else if (key === 'Delete') {
 				console.log('delete');
 				var text = bodyBeforeOperation.substring(index, index + changeLength);
