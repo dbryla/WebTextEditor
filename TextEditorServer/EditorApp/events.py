@@ -38,7 +38,7 @@ def message(request, socket, context, message):
 		message["files"] = []
 		for document in documents_list:
 			element = {}
-			element["id"] = document["id"]
+			element["id"] = str(document["id"])
 			element["name"] = document["name"]
 			message["files"].append(element)
 		socket.send(message)

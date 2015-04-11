@@ -104,6 +104,20 @@ $(document).ready( function() {
 					editorBody.innerHTML = currentContent.substring(0, pos) + currentContent.substring(pos + length, currentContent.length);
 					console.log('Removed.. new content: ' + editorBody.innerHTML);			
 				}
+			} else if (data.action === 'list') {
+				console.log('Recieved documents list: ' + data.files.length);
+				$.each(data.files, function() {
+					console.log(this);
+					var documentRow = $('<tr>');
+					documentRow.append($('<td>').append(this.name));
+					documentRow.append($('<td>').append($('<a>', {
+						href : '#',
+						onclick : 'selectDocument(this);return false;'
+					}).append($('<i>', {
+						class : 'fa fa-check-circle'
+					}))));
+					$('#documentList').append(documentRow);
+				});
 			}
 		});
 
@@ -159,6 +173,13 @@ $(document).ready( function() {
 			}
 			bodyBeforeOperation = editorBody.innerHTML;
 		});
+
+		$('#documentListButton').on('click', function() {
+			console.log('Filling documents list into table');
+			message = {action : 'list'};
+			socket.send(message);
+		});
+
 	});
 
 });
