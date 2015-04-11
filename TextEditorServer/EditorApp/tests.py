@@ -12,7 +12,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
-SAMPLE_TEXT = 'Użytkownik może wyświetlić i modyfikować dokument z jego zawartością.'
+SAMPLE_TEXT = u'Użytkownik może wyświetlić i modyfikować dokument z jego zawartością.'
 DOC_NAME = 'TestDocument'
 
 class TestEnv(TestCase):
@@ -86,7 +86,7 @@ class TestDBManager(TestCase):
 		with switch_db(Doc, DB_ALIAS) as Docx:
 			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
 			creation_date = doc.last_change
-			remove_text(doc, 'Użytkownik', 0)
+			remove_text(doc, u'Użytkownik', 0)
 			doc = Docx.objects(name=DOC_NAME)[0]
 			self.assertTrue(doc.text[0] == ' ')
 
