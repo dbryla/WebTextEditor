@@ -69,7 +69,7 @@ $(document).ready( function() {
 
 		socket = new io.Socket();
 		var documentId = '551347a1489f70f38ddb5126';
-		socket.connect();
+		socket.connect('http://127.0.0.1');
 		//subscribe
 		socket.on('connect', function() {
 			console.log('Subscribing for global document');
