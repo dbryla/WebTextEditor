@@ -21,29 +21,31 @@ def connect(request, socket, context, channel):
 	message["action"] = "doc"
 	socket.send(message)
 
+def handle_msg(operation, document_id):
+	document = get_document_or_404(Document, id = document_id)
+	if operation["type"] == INSERT:
+		insert_text(document, operation["text"], operation["pos"])
+	elif operation["type"] == REMOVE:
+		remove_text(document, operation["text"], operation["pos"])
+
+def handle_list(message):
+	documents_list = get_list_or_404(Document)
+	message["files"] = []
+	for document in documents_list:
+		element = {}
+		element["id"] = str(document["id"])
+		element["name"] = document["name"]
+		message["files"].append(element)
+
 @events.on_message(channel="^document-")
 def message(request, socket, context, message):
 	logger.info("Received message: " + str(message))
 	if message["action"] == "msg":
-		document = get_document_or_404(Document, id= ID)
-		operation = message["op"]
-		if operation["type"] == INSERT:
-			insert_text(document, operation["text"], operation["pos"])
-		elif operation["type"] == REMOVE:
-			remove_text(document, operation["text"], operation["pos"])
+		handle_msg(message["op"], message["id"])
 		socket.broadcast_channel(message)
-
 	elif message["action"] == "list":
-		documents_list = get_list_or_404(Document)
-		message["files"] = []
-		for document in documents_list:
-			element = {}
-			element["id"] = str(document["id"])
-			element["name"] = document["name"]
-			message["files"].append(element)
+		handle_list(message)
 		socket.send(message)
-
-		
 
 @events.on_connect
 def socket_connect(request, socket, context):

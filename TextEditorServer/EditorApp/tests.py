@@ -7,6 +7,7 @@ from mongoengine.context_managers import switch_db
 from django.http import Http404
 from bson.errors import InvalidId
 from db_manager import *
+from events import *
 import datetime
 import os
 
@@ -89,6 +90,41 @@ class TestDBManager(TestCase):
 			remove_text(doc, u'Użytkownik', 0)
 			doc = Docx.objects(name=DOC_NAME)[0]
 			self.assertTrue(doc.text[0] == ' ')
+
+	def tearDown(self):
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			Docx.drop_collection()
+
+class TestEvents(TestCase):
+
+	def setUp(self):
+		register_connection(DB_ALIAS, 'test')
+
+	def testHandleMsg(self):
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			handle_msg({'type' : 'i', 'pos' : 0, 'text': 'ala'}, doc['id'])
+			doc = Docx.objects(name=DOC_NAME)[0]
+			self.assertTrue(doc.text[:3] == 'ala')
+			Docx.drop_collection()
+			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			handle_msg({'type' : 'r', 'pos' : 0, 'text': u'Użytkownik'}, doc['id'])
+			doc = Docx.objects(name=DOC_NAME)[0]
+			print doc.text[0]
+			self.assertTrue(doc.text[0] == ' ')
+		with self.assertRaisesMessage(Http404, 'No Document matches the given query.'):
+			handle_msg({}, 'not_exisitng')
+
+	def testHandleList(self):
+		message = {}
+		handle_list(message)
+		self.assertTrue(len(message['files']), 0)
+		with switch_db(Doc, DB_ALIAS) as Docx:
+			doc = Docx(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			handle_list(message)
+			self.assertTrue(len(message['files']), 1)
+			doc = Docx(name=DOC_NAME + '1', last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
+			self.assertTrue(len(message['files']), 2)
 
 	def tearDown(self):
 		with switch_db(Doc, DB_ALIAS) as Docx:
