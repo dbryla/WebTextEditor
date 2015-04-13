@@ -106,6 +106,7 @@ $(document).ready( function() {
 				}
 			} else if (data.action === 'list') {
 				console.log('Recieved documents list: ' + data.files.length);
+				$('#documentList').find('tr').remove();
 				$.each(data.files, function() {
 					console.log(this);
 					var documentRow = $('<tr>');
