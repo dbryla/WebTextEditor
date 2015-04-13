@@ -137,22 +137,22 @@ $(document).ready( function() {
 					bodyBeforeOperation = editorBody.innerHTML;
 					return;
 				} else if (changeLength > 1 && text !== '</p>') {		    		
-					message = {id : documentId, op : { type :"r", text : text, pos : index}};
+					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
-				message = {id : documentId, op : { type :"i", text : key, pos : index}};
+				message = {id : documentId, action: "msg", op : { type :"i", text : key, pos : index}};
 				console.log('Sending insert message: ' + key + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Enter') {
 				console.log('enter');
 				if (changeLength > '</p><p><br>'.length) {
 					var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
-					message = {id : documentId, op : { type :"r", text : text, pos : index}};
+					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
-				message = {id : documentId, op : { type :"i", text : '</p><p>', pos : index}};
+				message = {id : documentId, action: "msg", op : { type :"i", text : '</p><p>', pos : index}};
 				console.log('Sending insert message: ' + key + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Backspace') {
@@ -161,14 +161,14 @@ $(document).ready( function() {
 				} else {
 					console.log('backspace');
 					var text = bodyBeforeOperation.substring(index, index + changeLength);
-					message = {id : documentId, op : { type :"r", text : text, pos : index}};
+					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
 			} else if (key === 'Delete') {
 				console.log('delete');
 				var text = bodyBeforeOperation.substring(index, index + changeLength);
-				message = {id : documentId, op : { type :"r", text : text, pos : index}};
+				message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
 				console.log('Sending remove message: ' + text + ' on pos: ' + index);
 				socket.send(message);
 			}
