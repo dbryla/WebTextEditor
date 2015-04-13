@@ -1,5 +1,15 @@
 $(document).ready( function() {
 
+	showWaitPage = function() {
+		$('#showWaitPageTrigger').trigger('click');
+	}
+
+	hideWaitPage = function() {
+		$('#closeWaitPageTrigger').trigger('click');
+	}
+
+	showWaitPage();
+
 	var editorIframe;
 	var editorDocument;
 	var editorBody;
@@ -53,7 +63,6 @@ $(document).ready( function() {
 		return s.length>l ? l : null;
 	};
 
-
 	$('iframe#editorContent').load(function() {
 		console.log('Loading iframe editorContent');
 		editorIframe = document.getElementById('editorContent');
@@ -82,6 +91,7 @@ $(document).ready( function() {
 			//recieved full document from server
 			if (data.action === 'doc') {
 				console.log('Action = doc, current content: ' + editorBody.innerHTML);
+				hideWaitPage();
 				editorBody.innerHTML = data.text;
 				bodyBeforeOperation = data.text;
 				console.log('Replaced content with: ' + data.text);
