@@ -10,6 +10,9 @@ from db_manager import *
 from events import *
 import datetime
 import os
+from selenium import selenium
+from selenium import webdriver
+import unittest, time
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
@@ -129,3 +132,58 @@ class TestEvents(TestCase):
 	def tearDown(self):
 		with switch_db(Doc, DB_ALIAS) as Docx:
 			Docx.drop_collection()
+
+class TestEditorContent(unittest.TestCase):
+
+	def setUp(self):
+		self.driver = webdriver.Firefox()
+		self.driver.implicitly_wait(30)
+		self.base_url = "http://localhost:8000/"
+		self.verificationErrors = []
+		self.accept_next_alert = True
+
+	def testRead(self):
+		driver = self.driver
+		driver.get(self.base_url)
+		driver.switch_to_frame("editorContent")
+		time.sleep(5)
+		content = driver.find_element_by_css_selector("#editorBody")
+		try: self.assertEqual("Lorem ipsum.", content.text)
+		except AssertionError as e: self.verificationErrors.append(str(e))
+
+	def testWrite(self):
+		driver = self.driver
+		driver.get(self.base_url)
+		driver.switch_to_frame("editorContent")
+		time.sleep(5)
+		content = driver.find_element_by_css_selector("#editorBody")
+		content.click()
+		content.clear()
+		SAMPLE_TEXT = 'Sample text.'
+		content.send_keys(SAMPLE_TEXT)
+		try: self.assertEqual(SAMPLE_TEXT, content.text)
+		except AssertionError as e: self.verificationErrors.append(str(e))
+
+	def tearDown(self):
+		self.driver.quit()
+		self.assertEqual([], self.verificationErrors)
+
+class TestListButton(unittest.TestCase):
+
+	def setUp(self):
+		self.verificationErrors = []
+		self.selenium = selenium("localhost", 4444, "*firefox", "http://localhost:8000/")
+		self.selenium.start()
+
+	def testButtonAction(self):
+		sel = self.selenium
+		sel.open("http://localhost:8000/")
+		sel.select_window("null")
+		sel.click("id=documentListButton")
+		try: self.assertEqual("Select file from list", sel.get_text("css=h3"))
+		except AssertionError, e: self.verificationErrors.append(str(e))
+		sel.click("css=div.reveal-modal-bg")
+
+	def tearDown(self):
+		self.selenium.stop()
+		self.assertEqual([], self.verificationErrors)
