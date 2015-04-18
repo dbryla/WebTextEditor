@@ -16,6 +16,11 @@
 	<script type="text/javascript" src="{{STATIC_URL}}js/jquery-migrate-1.2.1.min.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}js/jquery.reveal.js"></script>
 
+	<!-- Google API integration. -->
+	<script type="text/javascript" src="{{STATIC_URL}}js/gdrive.js"></script>
+	<script type="text/javascript" src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+
+
 	<style type="text/css">
 	body { font-family: "HelveticaNeue","Helvetica-Neue", "Helvetica", "Arial", sans-serif; }
 	.big-link { display:block; margin-top: 100px; text-align: center; font-size: 70px; color: #06f; }
@@ -55,7 +60,14 @@
 						<li><a><i class="fa fa-file-word-o"></i> ODT</a></li>
 					</ul>
 				</li>
-				<li><a id="documentListButton" href="#" data-reveal-id="fileListModal" data-animation="none"><i class="fa fa-list-alt"></i>Documents list</a></li>
+				<li><a id="documentListButton" href="#" data-reveal-id="fileListModal" data-animation="none">
+				<i class="fa fa-list-alt"></i>Documents list</a></li>
+				<li id="authorizeGDrive">
+					<a id="authorizeGDriveLink" href="#">Authorize with GoogleDrive</a>
+				</li>
+				<li id="exploreGDrive">
+					<a id="exploreGDriveLink" href="#">Explore GoogleDrive</a>
+				</li>
 				<li><a href=""><i >Share </i></a></li>
 			</ul>
 		</li>
