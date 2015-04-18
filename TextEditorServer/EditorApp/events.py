@@ -12,7 +12,7 @@ REMOVE = 'r'
 ID = '551347a1489f70f38ddb5126'
 
 
-@events.on_subscribe(channel="^document-")
+@events.on_subscribe(channel="^")
 def connect(request, socket, context, channel):
 	logger.info("Connected to channel: " + str(channel))
 	document = get_document_or_404(Document, id=ID)

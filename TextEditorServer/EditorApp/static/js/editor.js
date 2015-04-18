@@ -82,7 +82,7 @@ $(document).ready( function() {
 		//subscribe
 		socket.on('connect', function() {
 			console.log('Subscribing for global document');
-			socket.subscribe('document-global');
+			socket.subscribe(documentId);
 			console.log('Subscribed for global document');
 		});
 
