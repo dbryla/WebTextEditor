@@ -3,6 +3,7 @@ from mongoengine.django.shortcuts import get_document_or_404, get_list_or_404
 from db_manager import *
 from models import Document
 import logging
+import datetime
 
 logger = logging.getLogger('events')
 
@@ -37,6 +38,13 @@ def handle_list(message):
 		element["name"] = document["name"]
 		message["files"].append(element)
 
+def handle_create_document(message, text):
+	document = Document(name = message["name"])
+	document.last_change = datetime.datetime.now()
+	document.text = text
+	document.save()
+	message["id"] = str(document.id)
+
 @events.on_message(channel="^document-")
 def message(request, socket, context, message):
 	logger.info("Received message: " + str(message))
@@ -46,6 +54,14 @@ def message(request, socket, context, message):
 	elif message["action"] == "list":
 		handle_list(message)
 		socket.send(message)
+	elif message["action"] == "new":
+		handle_create_document(message, "")
+		socket.send(message)
+	elif message["action"] == "save":
+		handle_create_document(message, message["text"])
+		message["text"] = ""
+		socket.send(message)
+		
 
 @events.on_connect
 def socket_connect(request, socket, context):
