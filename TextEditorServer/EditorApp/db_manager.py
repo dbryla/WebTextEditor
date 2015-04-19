@@ -1,5 +1,6 @@
 import datetime
 import logging
+from models import Document
 
 logger = logging.getLogger('db_manager')
 
@@ -18,3 +19,11 @@ def remove_text(document, text, position):
 	logger.info("After removing text: " + document["text"])
 	document.save()
 	logger.info("Document saved")
+
+def create_document(name, text):
+	logger.info("Creating document " + name + ' with text ' + text)
+	document = Document(name = name)
+	document.last_change = datetime.datetime.now()
+	document.text = text
+	document.save()
+	logger.info("Document created")

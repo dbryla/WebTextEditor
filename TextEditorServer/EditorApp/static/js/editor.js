@@ -157,6 +157,9 @@ $(document).ready( function() {
 		});
 
 		$(editorDocument).on('keyup', function(event) {
+			if (bodyBeforeOperation == null) {
+				bodyBeforeOperation = ""
+			}
 			console.log('Old body: ' + bodyBeforeOperation);
 			console.log('Current body: ' + editorBody.innerHTML);
 			console.log('Pressed key in frame: ' + event.key);

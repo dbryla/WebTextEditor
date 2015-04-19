@@ -13,6 +13,9 @@ import os
 from mongoengine import *
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DATABASES_NAME = 'local'
+if os.environ['TEST'] == "1":
+    DATABASES_NAME = 'test'
+
 
 
 # Quick-start development settings - unsuitable for production

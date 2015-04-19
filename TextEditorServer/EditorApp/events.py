@@ -14,7 +14,8 @@ REMOVE = 'r'
 def connect(request, socket, context, channel):
 	logger.info("Connected to channel: " + channel)
 	document = get_document_or_404(Document, id = channel)
-	logger.info("Document content: " + document["text"])
+	if document["text"] != None:
+		logger.info("Document content: " + document["text"])
 	message = {}
 	message["text"] = document["text"]
 	message["action"] = "doc"
@@ -37,10 +38,7 @@ def handle_list(message):
 		message["files"].append(element)
 
 def handle_create_document(message, text):
-	document = Document(name = message["name"])
-	document.last_change = datetime.datetime.now()
-	document.text = text
-	document.save()
+	create_documet(message['name'], text)
 	message["id"] = str(document.id)
 
 @events.on_message(channel="^")
