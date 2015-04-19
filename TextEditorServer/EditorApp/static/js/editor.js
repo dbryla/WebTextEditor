@@ -41,6 +41,15 @@ $(document).ready( function() {
 		$('#fileListModal').trigger('reveal:close');
 
 	}
+	
+	function ChangeColor(tableRow, highLight) {
+		if (highLight) {
+		  tableRow.style.backgroundColor = '#dcfac9';
+		}
+		else {
+		  tableRow.style.backgroundColor = 'white';
+		}
+	}
 
 	String.prototype.insert = function (index, string) {
 		if (index > 0) {
@@ -119,14 +128,12 @@ $(document).ready( function() {
 				$('#documentList').find('tr').remove();
 				$.each(data.files, function() {
 					console.log(this);
-					var documentRow = $('<tr>');
+					var documentRow = $('<tr>', {
+						onmouseover: 'ChangeColor(this, true);' 
+						onmouseout: 'ChangeColor(this, false);' 
+						onclick: 'selectDocument(this);return false;'
+					});
 					documentRow.append($('<td>').append(this.name));
-					documentRow.append($('<td>').append($('<a>', {
-						href : '#',
-						onclick : 'selectDocument(this);return false;'
-					}).append($('<i>', {
-						class : 'fa fa-check-circle'
-					}))));
 					$('#documentList').append(documentRow);
 				});
 			}
