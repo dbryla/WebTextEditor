@@ -53,7 +53,7 @@ def message(request, socket, context, message):
 		handle_list(message)
 		socket.send(message)
 	elif message["action"] == "new":
-		handle_create_document(message, "<p></p>")
+		handle_create_document(message, "<p><br></p>")
 		socket.send(message)
 	elif message["action"] == "save":
 		handle_create_document(message, message["text"])

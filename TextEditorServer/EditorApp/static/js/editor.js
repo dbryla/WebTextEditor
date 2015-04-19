@@ -224,7 +224,7 @@ $(document).ready( function() {
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
 			console.log('New document save button clicked. Name: ' + name);
-			saveDocument(name, '<p></p>', 'new');
+			saveDocument(name, '<p><br></p>', 'new');
 		});
 	});
 
