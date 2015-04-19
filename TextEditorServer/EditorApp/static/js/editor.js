@@ -34,10 +34,12 @@ $(document).ready( function() {
 	}
 
 	prepareDocument = function(unsubscribeDocumentId, subscribeDocumentId) {
-		console.log('Unsubscribing from ' + unsubscribeDocumentId);
-		socket.unsubscribe(unsubscribeDocumentId);
+		if (unsubscribeDocumentId !== undefined) {
+			console.log('Unsubscribing from ' + unsubscribeDocumentId);
+			socket.unsubscribe('id-' + unsubscribeDocumentId);
+		}
 		console.log('Subscribing for ' + subscribeDocumentId);
-		socket.subscribe(subscribeDocumentId);
+		socket.subscribe('id-' + subscribeDocumentId);
 		documentId = subscribeDocumentId;
 	}
 
@@ -91,29 +93,28 @@ $(document).ready( function() {
 		editorIframe = (editorIframe.contentWindow) ? editorIframe.contentWindow : (editorIframe.contentDocument.document) ? editorIframe.contentDocument.document : editorIframe.contentDocument;
 
 		editorDocument = editorIframe.document;
-		var div = editorDocument.createElement('p');
-		div.innerHTML = 'Here you can put your text :)';
 		editorBody = editorDocument.getElementById('editorBody');
-		editorBody.innerHTML = '<p></br></p>';
 		console.log('Iframe editorContent successfully loaded');
 		var bodyBeforeOperation;
 
 		socket = new io.Socket();
-		documentId = '551347a1489f70f38ddb5126';
 		socket.connect('http://127.0.0.1');
+		
+		hideWaitPage();
+		$('#showFileListTrigger').trigger('click');
 		//subscribe
 		socket.on('connect', function() {
-			console.log('Subscribing for global document');
-			socket.subscribe(documentId);
-			console.log('Subscribed for global document');
+			console.log('Subscribing for document list');
+			socket.subscribe('list');
+			console.log('Subscribed for document list');
 		});
 
 		socket.on('message', function(data) {
 			console.log('Recieved message');
+			console.log(data);
 			//recieved full document from server
 			if (data.action === 'doc') {
 				console.log('Action = doc, current content: ' + editorBody.innerHTML);
-				hideWaitPage();
 				editorBody.innerHTML = data.text;
 				bodyBeforeOperation = data.text;
 				console.log('Replaced content with: ' + data.text);
@@ -214,7 +215,6 @@ $(document).ready( function() {
 			message = {action : 'list'};
 			socket.send(message);
 		});
-
 
 
 	});

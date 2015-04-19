@@ -10,15 +10,24 @@ logger = logging.getLogger('events')
 INSERT = 'i'
 REMOVE = 'r'
 
-@events.on_subscribe(channel="^")
+@events.on_subscribe(channel="list")
 def connect(request, socket, context, channel):
 	logger.info("Connected to channel: " + channel)
-	document = get_document_or_404(Document, id = channel)
+	message = {}
+	message["action"] = "list"
+	handle_list(message)
+	socket.send(message)
+
+@events.on_subscribe(channel="^id-")
+def connect(request, socket, context, channel):
+	logger.info("Connected to channel: " + channel)
+	document = get_document_or_404(Document, id = channel[3:])
 	logger.info("Document content: " + document["text"])
 	message = {}
 	message["text"] = document["text"]
 	message["action"] = "doc"
 	socket.send(message)
+
 
 def handle_msg(operation, document_id):
 	document = get_document_or_404(Document, id = document_id)
