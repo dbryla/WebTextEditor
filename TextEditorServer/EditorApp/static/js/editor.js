@@ -46,6 +46,7 @@ $(document).ready( function() {
 	selectDocument = function(element) {
 		selectedDocumentId = $(element).closest('tr').attr('id');
 		prepareDocument(documentId, selectedDocumentId);
+		$('#documentName').text($(element).children('td').text());
 		$('#fileListModal').trigger('reveal:close');
 	}
 
