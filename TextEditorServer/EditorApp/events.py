@@ -47,8 +47,8 @@ def handle_list(message):
 		message["files"].append(element)
 
 def handle_create_document(message, text):
-	create_documet(message['name'], text)
-	message["id"] = str(document.id)
+	id = create_document(message['name'], text)
+	message["id"] = str(id)
 
 @events.on_message(channel="^")
 def message(request, socket, context, message):

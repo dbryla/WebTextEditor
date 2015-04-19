@@ -26,4 +26,5 @@ def create_document(name, text):
 	document.last_change = datetime.datetime.now()
 	document.text = text
 	document.save()
-	logger.info("Document created")
+	logger.info("Document created with id: " + str(document.id))
+	return document.id
