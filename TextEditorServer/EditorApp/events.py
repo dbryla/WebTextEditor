@@ -13,9 +13,6 @@ REMOVE = 'r'
 @events.on_subscribe(channel="list")
 def connect(request, socket, context, channel):
 	logger.info("Connected to channel: " + channel)
-	document = get_document_or_404(Document, id = channel)
-	if document["text"] != None:
-		logger.info("Document content: " + document["text"])
 	message = {}
 	message["action"] = "list"
 	handle_list(message)

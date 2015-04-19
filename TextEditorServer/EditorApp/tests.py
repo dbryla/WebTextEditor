@@ -143,6 +143,8 @@ class TestEditorContent(unittest.TestCase):
 		driver = self.driver
 		time.sleep(1)
 		driver.get(self.base_url)
+		driver.find_element_by_css_selector("td").click()
+		time.sleep(1)
 		driver.switch_to_frame("editorContent")
 		time.sleep(5)
 		content = driver.find_element_by_css_selector("#editorBody")
@@ -169,7 +171,7 @@ class TestEditorContent(unittest.TestCase):
 		driver.find_element_by_class_name("has-menu").click()
 		driver.find_element_by_id("documentListButton").click()
 		time.sleep(5)
-		try: self.assertEqual("Select file from list", driver.find_element_by_css_selector("h3").text)
+		try: self.assertEqual("Select file from list", driver.find_element_by_css_selector("#fileListModal > h3").text)
 		except AssertionError as e: self.verificationErrors.append(str(e))
 		driver.find_element_by_css_selector("div.reveal-modal-bg").click()
 
