@@ -14,6 +14,7 @@ $(document).ready( function() {
 	var editorDocument;
 	var editorBody;
 	var socket;
+	var documentId;
 
 
 	function insertAtCaret(areaId,text) {
@@ -32,17 +33,18 @@ $(document).ready( function() {
 		selectedCell.innerHTML = fillContents;
 	}
 
-	function selectDocument(e) {
-		var currentRow = $(e).closest('tr');
-		var selectedFileName = currentRow.get(0).cells.item(0).getAttribute('value');
-		if (selectedFileName != null) {
-			document.getElementById('fileName').value = selectedFileName;
-		}
+	selectDocument = function(element) {
+		selectedDocumentId = $(element).closest('tr').attr('id');
+		console.log('Chosen document from list with id: ' + selectedDocumentId);
+		console.log('Unsubscribing from document: ' + documentId);
+		socket.unsubscribe(documentId);
+		socket.subscribe(selectedDocumentId);
+		documentId = selectedDocumentId;
 		$('#fileListModal').trigger('reveal:close');
-
 	}
+
 	
-	function ChangeColor(tableRow, highLight) {
+	changeBackgroundColor = function(tableRow, highLight) {
 		if (highLight) {
 		  tableRow.style.backgroundColor = '#dcfac9';
 		}
@@ -86,7 +88,7 @@ $(document).ready( function() {
 		var bodyBeforeOperation;
 
 		socket = new io.Socket();
-		var documentId = '551347a1489f70f38ddb5126';
+		documentId = '551347a1489f70f38ddb5126';
 		socket.connect('http://127.0.0.1');
 		//subscribe
 		socket.on('connect', function() {
@@ -129,8 +131,9 @@ $(document).ready( function() {
 				$.each(data.files, function() {
 					console.log(this);
 					var documentRow = $('<tr>', {
-						onmouseover: 'ChangeColor(this, true);' 
-						onmouseout: 'ChangeColor(this, false);' 
+						id: this.id,
+						onmouseover: 'changeBackgroundColor(this, true);', 
+						onmouseout: 'changeBackgroundColor(this, false);', 
 						onclick: 'selectDocument(this);return false;'
 					});
 					documentRow.append($('<td>').append(this.name));
