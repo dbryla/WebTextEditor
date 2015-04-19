@@ -33,13 +33,17 @@ $(document).ready( function() {
 		selectedCell.innerHTML = fillContents;
 	}
 
+	prepareDocument = function(unsubscribeDocumentId, subscribeDocumentId) {
+		console.log('Unsubscribing from ' + unsubscribeDocumentId);
+		socket.unsubscribe(unsubscribeDocumentId);
+		console.log('Subscribing for ' + subscribeDocumentId);
+		socket.subscribe(subscribeDocumentId);
+		documentId = subscribeDocumentId;
+	}
+
 	selectDocument = function(element) {
 		selectedDocumentId = $(element).closest('tr').attr('id');
-		console.log('Chosen document from list with id: ' + selectedDocumentId);
-		console.log('Unsubscribing from document: ' + documentId);
-		socket.unsubscribe(documentId);
-		socket.subscribe(selectedDocumentId);
-		documentId = selectedDocumentId;
+		prepareDocument(documentId, selectedDocumentId);
 		$('#fileListModal').trigger('reveal:close');
 	}
 
@@ -51,6 +55,13 @@ $(document).ready( function() {
 		else {
 		  tableRow.style.backgroundColor = 'white';
 		}
+	}
+
+	saveDocument = function(documentName, documentBody, action) {
+		console.log(documentName + ' ' + documentBody);
+		var saveMessage = { action : action, text : documentBody, name: documentName };
+		socket.send(saveMessage);
+		$('#closeFileNameTrigger').trigger('click');
 	}
 
 	String.prototype.insert = function (index, string) {
@@ -139,6 +150,9 @@ $(document).ready( function() {
 					documentRow.append($('<td>').append(this.name));
 					$('#documentList').append(documentRow);
 				});
+			} else if (data.action === 'save' || data.action === 'new') {
+				console.log(data);
+				prepareDocument(documentId, data.id);
 			}
 		});
 
@@ -201,6 +215,26 @@ $(document).ready( function() {
 			socket.send(message);
 		});
 
+
+
+	});
+
+	$('#newDocument').on('click', function() {
+		$('#saveDocumentButton').unbind("click");
+		$('#saveDocumentButton').on('click', function() {
+			var name = $('#documentName').val();
+			console.log('New document save button clicked. Name: ' + name);
+			saveDocument(name, '<p></p>', 'new');
+		});
+	});
+
+	$('#saveDocument').on('click', function() {
+		$('#saveDocumentButton').unbind("click");
+		$('#saveDocumentButton').on('click', function() {
+			var name = $('#documentName').val();
+			console.log('Save document save button clicked. Name: ' + name);
+			saveDocument(name, editorBody.innerHTML, 'save');
+		});
 	});
 
 });

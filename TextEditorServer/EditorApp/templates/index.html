@@ -114,14 +114,15 @@
 	<div id="waitPageModal" class="reveal-modal">
 	     <h1>Loading page</h1>
 	     <p>Please wait...</p>
-	     <a id="closeWaitPageTrigger" class="close-reveal-modal"/>
-	     <a id="showWaitPageTrigger" data-reveal-id="waitPageModal" data-closeonbackgroundclick="false"/>
+	     <a id="closeWaitPageTrigger" class="close-reveal-modal"></a>
+	     <a id="showWaitPageTrigger" data-reveal-id="waitPageModal" data-closeonbackgroundclick="false"></a>
 	</div>
 	<div id="fileNameModal" class="reveal-modal">
 		<label for="documentName">Document name:</label>
 		<input id="documentName" type="text" />
-		<button class="medium green">Save</button>
+		<button id="saveDocumentButton" class="medium green">Save</button>
 		<button class="medium" onclick="$('#fileNameModal').trigger('reveal:close');">Cancel</button>
+		<a id="closeFileNameTrigger" class="close-reveal-modal"></a>
 	</div>
 	
 </body>
