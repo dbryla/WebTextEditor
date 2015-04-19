@@ -10,16 +10,28 @@ logger = logging.getLogger('events')
 INSERT = 'i'
 REMOVE = 'r'
 
-@events.on_subscribe(channel="^")
+@events.on_subscribe(channel="list")
 def connect(request, socket, context, channel):
 	logger.info("Connected to channel: " + channel)
 	document = get_document_or_404(Document, id = channel)
 	if document["text"] != None:
 		logger.info("Document content: " + document["text"])
 	message = {}
+	message["action"] = "list"
+	handle_list(message)
+	socket.send(message)
+
+@events.on_subscribe(channel="^id-")
+def connect(request, socket, context, channel):
+	logger.info("Connected to channel: " + channel)
+	document = get_document_or_404(Document, id = channel[3:])
+	if document["text"] != None:
+		logger.info("Document content: " + document["text"])
+	message = {}
 	message["text"] = document["text"]
 	message["action"] = "doc"
 	socket.send(message)
+
 
 def handle_msg(operation, document_id):
 	document = get_document_or_404(Document, id = document_id)
@@ -51,7 +63,7 @@ def message(request, socket, context, message):
 		handle_list(message)
 		socket.send(message)
 	elif message["action"] == "new":
-		handle_create_document(message, "<p></p>")
+		handle_create_document(message, "<p><br></p>")
 		socket.send(message)
 	elif message["action"] == "save":
 		handle_create_document(message, message["text"])
