@@ -12,7 +12,8 @@ REMOVE = 'r'
 
 @events.on_subscribe(channel="list")
 def connect(request, socket, context, channel):
-	logger.info("Connected to channel: " + channel)
+	logger.info("Subscribed to channel: " + channel
+		+" with session id: " + str(socket.socket.session.session_id))
 	message = {}
 	message["action"] = "list"
 	handle_list(message)
@@ -20,7 +21,8 @@ def connect(request, socket, context, channel):
 
 @events.on_subscribe(channel="^id-")
 def connect(request, socket, context, channel):
-	logger.info("Connected to channel: " + channel)
+	logger.info("Subscribed to channel: " + channel 
+		+ " with session id: " + str(socket.socket.session.session_id))
 	document = get_document_or_404(Document, id = channel[3:])
 	if document["text"] != None:
 		logger.info("Document content: " + document["text"])
@@ -46,8 +48,8 @@ def handle_list(message):
 		element["name"] = document["name"]
 		message["files"].append(element)
 
-def handle_create_document(message, text):
-	id = create_document(message['name'], text)
+def handle_create_document(message):
+	id = create_document(message['name'], message["text"])
 	message["id"] = str(id)
 
 @events.on_message(channel="^")
@@ -59,31 +61,29 @@ def message(request, socket, context, message):
 	elif message["action"] == "list":
 		handle_list(message)
 		socket.send(message)
-	elif message["action"] == "new":
-		handle_create_document(message, "<p><br></p>")
-		socket.send(message)
 	elif message["action"] == "save":
-		handle_create_document(message, message["text"])
+		handle_create_document(message)
 		message["text"] = ""
 		socket.send(message)
 		
 
 @events.on_connect
 def socket_connect(request, socket, context):
-	logger.info("Connection established to socket")
+	logger.info("Connection established to socket with session id: " + str(socket.socket.session.session_id))
 
-@events.on_unsubscribe
+@events.on_unsubscribe(channel="^")
 def unsubscribe(request, socket, context, channel):
-	logger.info("Unsubscribe from channel " + channel)
+	logger.info("Unsubscribe from channel " + channel + " with session id: " + str(socket.socket.session.session_id))
 
 @events.on_error
 def error(request, socket, context, exception):
-	logger.error("Error from socket: " + exception)
+	logger.error("Error from socket with session id: " + str(socket.socket.session.session_id) 
+		+ " exception: " + exception)
 
 @events.on_disconnect
 def disconnect(request, socket, context):
-	logger.info("Disconnected")
+	logger.info("Disconnected from socket with session id: " + str(socket.socket.session.session_id))
 
 @events.on_finish
 def finish(request, socket, context):
-	logger.info("Finished")
+	logger.info("Finished with session id: " + str(socket.socket.session.session_id))

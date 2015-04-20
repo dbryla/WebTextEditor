@@ -65,6 +65,7 @@ $(document).ready( function() {
 		var saveMessage = { action : action, text : documentBody, name: documentName };
 		socket.send(saveMessage);
 		$('#closeFileNameTrigger').trigger('click');
+		$('#documentNameHeader').text(documentName);
 	}
 
 	String.prototype.insert = function (index, string) {
@@ -152,7 +153,7 @@ $(document).ready( function() {
 					documentRow.append($('<td>').append(this.name));
 					$('#documentList').append(documentRow);
 				});
-			} else if (data.action === 'save' || data.action === 'new') {
+			} else if (data.action === 'save') {
 				console.log(data);
 				prepareDocument(documentId, data.id);
 			}
@@ -228,7 +229,7 @@ $(document).ready( function() {
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
 			console.log('New document save button clicked. Name: ' + name);
-			saveDocument(name, '<p><br></p>', 'new');
+			saveDocument(name, '<p><br></p>', 'save');
 		});
 	});
 
