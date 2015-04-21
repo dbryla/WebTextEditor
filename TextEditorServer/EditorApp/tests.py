@@ -19,6 +19,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
 SAMPLE_TEXT = u'Użytkownik może wyświetlić i modyfikować dokument z jego zawartością.'
 DOC_NAME = 'TestDocument'
+EMPTY_DOC_STRING = '<p><br></p>'
+LOREM_IPSUM = '<p>Lorem ipsum.</p>'
 
 class TestEnv(TestCase):
 
@@ -124,10 +126,24 @@ class TestEvents(TestCase):
 		handle_list(message)
 		self.assertTrue(len(message['files']), 2)
 
+	def testHandleCreateDocument(self):
+		msg = {'name': DOC_NAME, 'text': EMPTY_DOC_STRING}
+		handle_create_document(msg)
+		id = msg['id']
+		created_document = Doc.objects(id=id)[0]
+		self.assertTrue(created_document['name'] == DOC_NAME)
+		self.assertTrue(created_document['text'] == EMPTY_DOC_STRING)
+		msg = {'name': DOC_NAME, 'text': SAMPLE_TEXT}
+		handle_create_document(msg)
+		id = msg['id']
+		created_document = Doc.objects(id=id)[0]
+		self.assertTrue(created_document['name'] == DOC_NAME)
+		self.assertTrue(created_document['text'] == SAMPLE_TEXT)
+
 	def tearDown(self):
 		Doc.drop_collection()
 
-class TestEditorContent(unittest.TestCase):
+class TestUI(unittest.TestCase):
 
 	def setUp(self):
 		self.display = Display(visible=0, size=(800, 600))
@@ -139,7 +155,7 @@ class TestEditorContent(unittest.TestCase):
 		self.accept_next_alert = True
 
 	def testRead(self):
-		Doc(id='551347a1489f70f38ddb5126', name=DOC_NAME, text='<p>Lorem ipsum.</p>').save()
+		Doc(name=DOC_NAME, text=LOREM_IPSUM).save()
 		driver = self.driver
 		time.sleep(1)
 		driver.get(self.base_url)
@@ -174,6 +190,30 @@ class TestEditorContent(unittest.TestCase):
 		try: self.assertEqual("Select file from list", driver.find_element_by_css_selector("#fileListModal > h3").text)
 		except AssertionError as e: self.verificationErrors.append(str(e))
 		driver.find_element_by_css_selector("div.reveal-modal-bg").click()
+
+	def testSaveAs(self):
+		Doc(name=DOC_NAME + '1', text=LOREM_IPSUM).save()
+		driver = self.driver
+		time.sleep(1)
+		driver.get(self.base_url)
+		driver.find_element_by_css_selector("td").click()
+		driver.find_element_by_id("saveDocument").click()
+		driver.find_element_by_id("documentName").clear()
+		driver.find_element_by_id("documentName").send_keys(DOC_NAME)
+		driver.find_element_by_id("saveDocumentButton").click()
+		self.assertTrue(Doc.objects(name=DOC_NAME)[0]['text'] == LOREM_IPSUM)
+
+	def testNewDocument(self):
+		Doc(name=DOC_NAME + '1', text=LOREM_IPSUM).save()
+		driver = self.driver
+		time.sleep(1)
+		driver.get(self.base_url)
+		driver.find_element_by_css_selector("td").click()
+		driver.find_element_by_id("newDocument").click()
+		driver.find_element_by_id("documentName").clear()
+		driver.find_element_by_id("documentName").send_keys(DOC_NAME)
+		driver.find_element_by_id("saveDocumentButton").click()
+		self.assertTrue(Doc.objects(name=DOC_NAME)[0]['text'] == EMPTY_DOC_STRING)
 
 	def tearDown(self):
 		self.driver.quit()
