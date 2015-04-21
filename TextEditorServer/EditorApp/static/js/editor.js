@@ -161,7 +161,7 @@ $(document).ready( function() {
 
 		$(editorDocument).on('keyup', function(event) {
 			if (bodyBeforeOperation == null) {
-				bodyBeforeOperation = ""
+				bodyBeforeOperation = "";
 			}
 			console.log('Old body: ' + bodyBeforeOperation);
 			console.log('Current body: ' + editorBody.innerHTML);
@@ -170,7 +170,8 @@ $(document).ready( function() {
 			console.log('Selected text: ' + editorIframe.getSelection());
 			var key = event.key;
 			var index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
-			var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length)
+			var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length);
+			console.log('Change length: ' + changeLength);
 			if (key.length == 1) {
 				var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
 				if (changeLength < 1) {
@@ -192,7 +193,7 @@ $(document).ready( function() {
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
-				message = {id : documentId, action: "msg", op : { type :"i", text : '</p><p>', pos : index}};
+				message = {id : documentId, action: "msg", op : { type :"i", text : '<p></p>', pos : index}};
 				console.log('Sending insert message: ' + key + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Backspace') {
