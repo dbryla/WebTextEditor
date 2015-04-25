@@ -15,7 +15,7 @@ $(document).ready( function() {
 	var editorBody;
 	var socket;
 	var documentId = undefined;
-	var selection;
+	var selection = '';
 
 
 	function insertAtCaret(areaId,text) {
@@ -170,6 +170,18 @@ $(document).ready( function() {
 			console.log('Selected text: ' + selection);			
 		});
 
+		sendRemoveText = function(doc, text, position) {
+			message = {id : doc, action: "msg", op : { type :"r", text : text, pos : position}};
+			console.log('Sending remove message: ' + text + ' on pos: ' + position);
+			socket.send(message);
+		}
+
+		sendInsertText = function(doc, text, position) {
+			message = {id : doc, action: "msg", op : { type :"i", text : text, pos : position}};
+			console.log('Sending insert message: ' + text + ' on pos: ' + position);
+			socket.send(message);
+		}
+
 		$(editorDocument).on('keyup', function(event) {
 			if (bodyBeforeOperation == null) {
 				bodyBeforeOperation = "";
@@ -186,47 +198,82 @@ $(document).ready( function() {
 			console.log('Change length: ' + changeLength);
 			if (key.length == 1) {
 				var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
+				//TODO: fix when selected just one character
+				//TODO: fix when typing in character same as selection start
 				if (changeLength < 1) {
+					//no changes
 					bodyBeforeOperation = editorBody.innerHTML;
 					return;
-				} else if (selection.length > 1) {		    		
-					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-					console.log('Sending remove message: ' + text + ' on pos: ' + index);
-					socket.send(message);
+				} else if (selection.length > 1) {
+					//remove selection and add new text		    		
+					sendRemoveText(documentId, text, index);
+					var text = editorBody.innerHTML.substring(index, index + changeLength);
+					sendInsertText(documentId, key, index);
+				} else {
+					//simple add text
+					var text = editorBody.innerHTML.substring(index, index + changeLength);
+					sendInsertText(documentId, text, index);
 				}
-				var text = editorBody.innerHTML.substring(index, index + changeLength);
-				message = {id : documentId, action: "msg", op : { type :"i", text : text, pos : index}};
-				console.log('Sending insert message: ' + text + ' on pos: ' + index);
-				socket.send(message);
 			} else if (key === 'Enter') {
 				console.log('enter');
 				if (selection.length > 1) {
-					var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
-					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-					console.log('Sending remove message: ' + text + ' on pos: ' + index);
-					socket.send(message);
+					//replaces selection with new line
+					//TODO: fix selection ending with the end of line
+					//TODO: fix selection of single line
+					//TODO: fix selection starting with start of line <- big problem since <p> after selecton dissapear
+					var text = bodyBeforeOperation.substring(index, index + changeLength + 7);
+					sendRemoveText(documentId, text, index);
+					sendInsertText(documentId, '</p><p>', index);
+				} else {
+					//simple new line add
+					var text = editorBody.innerHTML.substring(index, index + changeLength);
+					sendInsertText(documentId, text, index);
 				}
-				var text = editorBody.innerHTML.substring(index, index + changeLength);
-				console.log(text);
-				message = {id : documentId, action: "msg", op : { type :"i", text : text, pos : index}};
-				console.log('Sending insert message: ' + key + ' on pos: ' + index);
-				socket.send(message);
 			} else if (key === 'Backspace') {
+				console.log('backspace');
 				if (editorBody.innerHTML === '' || editorBody.innerHTML === '<br>' ) {
+					//prevents from removing <p> on empty document
 					editorBody.innerHTML = '<p></br></p>';
 				} else {
 					console.log('backspace');
-					var text = bodyBeforeOperation.substring(index, index + changeLength);
-					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-					console.log('Sending remove message: ' + text + ' on pos: ' + index);
-					socket.send(message);
+					if (selection.length === 0 && changeLength === 3) {
+						//when backspacing character after space iframe adds <br>
+						var text = bodyBeforeOperation.substring(index, index + 1);
+						sendRemoveText(documentId, text, index);
+						sendInsertText(documentId, '<br>', index);
+					} else {
+						//simple remove
+						var text = bodyBeforeOperation.substring(index, index + changeLength);
+						sendRemoveText(documentId, text, index);
+					}
 				}
 			} else if (key === 'Delete') {
 				console.log('delete');
-				var text = bodyBeforeOperation.substring(index, index + changeLength);
-				message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-				console.log('Sending remove message: ' + text + ' on pos: ' + index);
-				socket.send(message);
+				console.log(text);
+				console.log(selection.length);
+				console.log(changeLength);
+				if (selection.length === 0) {
+					if (changeLength === 4) {
+						//when deleting character before space iframe changes space into &nbsp;
+						var text = bodyBeforeOperation.substring(index, index + 2);
+						sendRemoveText(documentId, text, index);
+						sendInsertText(documentId, '&nbsp;', index);
+					} else if (changeLength === 3) {
+						//when deleting character before new line iframe adds <br>
+						var text = bodyBeforeOperation.substring(index, index + 1);
+						sendRemoveText(documentId, text, index);
+						sendInsertText(documentId, '<br>', index);
+					} else {
+						//simple remove of character
+						var text = bodyBeforeOperation.substring(index, index + changeLength);
+						sendRemoveText(documentId, text, index);
+					}
+				} else {
+					//simple remove of whole selection
+					//TODO: fix selection starting with start of line
+					var text = bodyBeforeOperation.substring(index, index + changeLength);
+					sendRemoveText(documentId, text, index);
+				}
 			}
 			bodyBeforeOperation = editorBody.innerHTML;
 			selection = '';
