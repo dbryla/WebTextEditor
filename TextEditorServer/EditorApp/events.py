@@ -43,13 +43,14 @@ def handle_list(message):
 	documents_list = get_list_or_404(Document)
 	message["files"] = []
 	for document in documents_list:
-		element = {}
-		element["id"] = str(document["id"])
-		element["name"] = document["name"]
-		message["files"].append(element)
+		if document['priv'] != True:
+			element = {}
+			element["id"] = str(document["id"])
+			element["name"] = document["name"]
+			message["files"].append(element)
 
 def handle_create_document(message):
-	id = create_document(message['name'], message["text"])
+	id = create_document(message['name'], message["text"], message['priv'])
 	message["id"] = str(id)
 
 @events.on_message(channel="^")

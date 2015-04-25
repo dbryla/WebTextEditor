@@ -64,9 +64,9 @@ $(document).ready( function() {
 		}
 	}
 
-	saveDocument = function(documentName, documentBody, action) {
+	saveDocument = function(documentName, documentBody, privateFlag) {
 		console.log(documentName + ' ' + documentBody);
-		var saveMessage = { action : action, text : documentBody, name: documentName };
+		var saveMessage = { action : 'save', text : documentBody, name: documentName, priv : privateFlag };
 		socket.send(saveMessage);
 		$('#closeFileNameTrigger').trigger('click');
 		$('#documentNameHeader').text(documentName);
@@ -245,8 +245,9 @@ $(document).ready( function() {
 		$('#saveDocumentButton').unbind("click");
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
-			console.log('New document save button clicked. Name: ' + name);
-			saveDocument(name, '<p><br></p>', 'save');
+			var privateFlag = $('#privateFlag').is(":checked");
+			console.log('New document save button clicked. Name: ' + name + ' is private: ' + privateFlag);
+			saveDocument(name, '<p><br></p>', privateFlag);
 		});
 	});
 
@@ -254,8 +255,9 @@ $(document).ready( function() {
 		$('#saveDocumentButton').unbind("click");
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
-			console.log('Save document save button clicked. Name: ' + name);
-			saveDocument(name, editorBody.innerHTML, 'save');
+			var privateFlag = $('#privateFlag').is(":checked");
+			console.log('Save document save button clicked. Name: ' + name + ', is private: ' + privateFlag);
+			saveDocument(name, editorBody.innerHTML, privateFlag);
 		});
 	});
 

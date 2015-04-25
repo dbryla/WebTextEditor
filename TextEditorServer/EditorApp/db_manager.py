@@ -20,11 +20,12 @@ def remove_text(document, text, position):
 	document.save()
 	logger.info("Document saved")
 
-def create_document(name, text):
-	logger.info("Creating document " + name + ' with text ' + text)
+def create_document(name, text, priv=False):
+	logger.info("Creating document " + name + ' with text ' + text + ' in private mode: ' + str(priv))
 	document = Document(name = name)
 	document.last_change = datetime.datetime.now()
 	document.text = text
+	document.priv = priv
 	document.save()
 	logger.info("Document created with id: " + str(document.id))
 	return document.id
