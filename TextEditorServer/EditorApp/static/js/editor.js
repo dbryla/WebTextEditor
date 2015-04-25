@@ -14,7 +14,7 @@ $(document).ready( function() {
 	var editorDocument;
 	var editorBody;
 	var socket;
-	var documentId;
+	var documentId = 'list';
 	var selection;
 
 
@@ -37,16 +37,16 @@ $(document).ready( function() {
 	prepareDocument = function(unsubscribeDocumentId, subscribeDocumentId) {
 		if (unsubscribeDocumentId !== undefined) {
 			console.log('Unsubscribing from ' + unsubscribeDocumentId);
-			socket.unsubscribe('id-' + unsubscribeDocumentId);
+			socket.unsubscribe(unsubscribeDocumentId);
 		}
 		console.log('Subscribing for ' + subscribeDocumentId);
-		socket.subscribe('id-' + subscribeDocumentId);
+		socket.subscribe(subscribeDocumentId);
 		documentId = subscribeDocumentId;
 	}
 
 	selectDocument = function(element) {
 		selectedDocumentId = $(element).closest('tr').attr('id');
-		prepareDocument(documentId, selectedDocumentId);
+		prepareDocument(documentId, 'id-' + selectedDocumentId);
 		$('#documentNameHeader').text($(element).children('td').text());
 		$('#fileListModal').trigger('reveal:close');
 	}
