@@ -206,7 +206,9 @@ $(document).ready( function() {
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
-				message = {id : documentId, action: "msg", op : { type :"i", text : '</p><p>', pos : index}};
+				var text = editorBody.innerHTML.substring(index, index + changeLength);
+				console.log(text);
+				message = {id : documentId, action: "msg", op : { type :"i", text : text, pos : index}};
 				console.log('Sending insert message: ' + key + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Backspace') {
