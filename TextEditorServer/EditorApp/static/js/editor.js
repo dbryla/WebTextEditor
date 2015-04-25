@@ -197,7 +197,7 @@ $(document).ready( function() {
 				socket.send(message);
 			} else if (key === 'Enter') {
 				console.log('enter');
-				if (changeLength > '</p><p><br>'.length) {
+				if (selection.length > 1) {
 					var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
 					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
