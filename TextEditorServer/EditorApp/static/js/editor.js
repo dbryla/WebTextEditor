@@ -15,6 +15,7 @@ $(document).ready( function() {
 	var editorBody;
 	var socket;
 	var documentId;
+	var selection;
 
 
 	function insertAtCaret(areaId,text) {
@@ -159,6 +160,13 @@ $(document).ready( function() {
 			}
 		});
 
+		var selection;
+
+		$(editorBody).on('mouseup', function() {
+			selection = rangy.getSelection(editorIframe).toHtml();
+			console.log('Selected text: ' + selection);			
+		});
+
 		$(editorDocument).on('keyup', function(event) {
 			if (bodyBeforeOperation == null) {
 				bodyBeforeOperation = "";
@@ -167,7 +175,8 @@ $(document).ready( function() {
 			console.log('Current body: ' + editorBody.innerHTML);
 			console.log('Pressed key in frame: ' + event.key);
 			console.log(event);
-			console.log('Selected text: ' + editorIframe.getSelection());
+			console.log('Selected text: ');
+			console.log(selection);
 			var key = event.key;
 			var index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
 			var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length);
@@ -177,13 +186,14 @@ $(document).ready( function() {
 				if (changeLength < 1) {
 					bodyBeforeOperation = editorBody.innerHTML;
 					return;
-				} else if (changeLength > 1 && text !== '</p>') {		    		
+				} else if (selection.length > 1) {		    		
 					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
-				message = {id : documentId, action: "msg", op : { type :"i", text : key, pos : index}};
-				console.log('Sending insert message: ' + key + ' on pos: ' + index);
+				var text = editorBody.innerHTML.substring(index, index + changeLength);
+				message = {id : documentId, action: "msg", op : { type :"i", text : text, pos : index}};
+				console.log('Sending insert message: ' + text + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Enter') {
 				console.log('enter');
@@ -214,6 +224,7 @@ $(document).ready( function() {
 				socket.send(message);
 			}
 			bodyBeforeOperation = editorBody.innerHTML;
+			selection = '';
 		});
 
 		$('#documentListButton').on('click', function() {
