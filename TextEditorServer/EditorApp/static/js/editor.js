@@ -14,7 +14,7 @@ $(document).ready( function() {
 	var editorDocument;
 	var editorBody;
 	var socket;
-	var documentId = 'list';
+	var documentId = undefined;
 	var selection;
 
 
@@ -37,16 +37,19 @@ $(document).ready( function() {
 	prepareDocument = function(unsubscribeDocumentId, subscribeDocumentId) {
 		if (unsubscribeDocumentId !== undefined) {
 			console.log('Unsubscribing from ' + unsubscribeDocumentId);
-			socket.unsubscribe(unsubscribeDocumentId);
+			socket.unsubscribe('id-' + unsubscribeDocumentId);
+		} else {
+			console.log('Unsubscribing from list');
+			socket.unsubscribe('list');
 		}
 		console.log('Subscribing for ' + subscribeDocumentId);
-		socket.subscribe(subscribeDocumentId);
+		socket.subscribe('id-' + subscribeDocumentId);
 		documentId = subscribeDocumentId;
 	}
 
 	selectDocument = function(element) {
 		selectedDocumentId = $(element).closest('tr').attr('id');
-		prepareDocument(documentId, 'id-' + selectedDocumentId);
+		prepareDocument(documentId, selectedDocumentId);
 		$('#documentNameHeader').text($(element).children('td').text());
 		$('#fileListModal').trigger('reveal:close');
 	}
@@ -203,7 +206,7 @@ $(document).ready( function() {
 					console.log('Sending remove message: ' + text + ' on pos: ' + index);
 					socket.send(message);
 				}
-				message = {id : documentId, action: "msg", op : { type :"i", text : '<p></p>', pos : index}};
+				message = {id : documentId, action: "msg", op : { type :"i", text : '</p><p>', pos : index}};
 				console.log('Sending insert message: ' + key + ' on pos: ' + index);
 				socket.send(message);
 			} else if (key === 'Backspace') {
