@@ -14,6 +14,7 @@ from selenium import selenium
 from selenium import webdriver
 import unittest, time
 from pyvirtualdisplay import Display
+import django.contrib.auth.models.AnonymousUser 
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
@@ -116,25 +117,27 @@ class TestEvents(TestCase):
 
 	def testHandleList(self):
 		message = {}
+		request = {'user' : AnonymousUser}
 		with self.assertRaisesMessage(Http404, 'No Document matches the given query.'):
-			handle_list(message)
+			handle_list(message, request)
 		doc = Doc(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
-		handle_list(message)
+		handle_list(message, request)
 		self.assertTrue(len(message['files']), 1)
 		self.assertTrue(message['files'][0]['name'] == DOC_NAME)
 		doc = Doc(name=DOC_NAME + '1', last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
-		handle_list(message)
+		handle_list(message, request)
 		self.assertTrue(len(message['files']), 2)
 
 	def testHandleCreateDocument(self):
 		msg = {'name': DOC_NAME, 'text': EMPTY_DOC_STRING, 'priv': False}
-		handle_create_document(msg)
+		request = {'user' : AnonymousUser}
+		handle_create_document(msg, request)
 		id = msg['id']
 		created_document = Doc.objects(id=id)[0]
 		self.assertTrue(created_document['name'] == DOC_NAME)
 		self.assertTrue(created_document['text'] == EMPTY_DOC_STRING)
 		msg = {'name': DOC_NAME, 'text': SAMPLE_TEXT, 'priv': False}
-		handle_create_document(msg)
+		handle_create_document(msg, request)
 		id = msg['id']
 		created_document = Doc.objects(id=id)[0]
 		self.assertTrue(created_document['name'] == DOC_NAME)
