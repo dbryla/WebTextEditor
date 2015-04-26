@@ -127,13 +127,13 @@ class TestEvents(TestCase):
 		self.assertTrue(len(message['files']), 2)
 
 	def testHandleCreateDocument(self):
-		msg = {'name': DOC_NAME, 'text': EMPTY_DOC_STRING}
+		msg = {'name': DOC_NAME, 'text': EMPTY_DOC_STRING, 'priv': False}
 		handle_create_document(msg)
 		id = msg['id']
 		created_document = Doc.objects(id=id)[0]
 		self.assertTrue(created_document['name'] == DOC_NAME)
 		self.assertTrue(created_document['text'] == EMPTY_DOC_STRING)
-		msg = {'name': DOC_NAME, 'text': SAMPLE_TEXT}
+		msg = {'name': DOC_NAME, 'text': SAMPLE_TEXT, 'priv': False}
 		handle_create_document(msg)
 		id = msg['id']
 		created_document = Doc.objects(id=id)[0]

@@ -14,7 +14,8 @@ $(document).ready( function() {
 	var editorDocument;
 	var editorBody;
 	var socket;
-	var documentId;
+	var documentId = undefined;
+	var selection = '';
 
 
 	function insertAtCaret(areaId,text) {
@@ -37,6 +38,9 @@ $(document).ready( function() {
 		if (unsubscribeDocumentId !== undefined) {
 			console.log('Unsubscribing from ' + unsubscribeDocumentId);
 			socket.unsubscribe('id-' + unsubscribeDocumentId);
+		} else {
+			console.log('Unsubscribing from list');
+			socket.unsubscribe('list');
 		}
 		console.log('Subscribing for ' + subscribeDocumentId);
 		socket.subscribe('id-' + subscribeDocumentId);
@@ -60,9 +64,9 @@ $(document).ready( function() {
 		}
 	}
 
-	saveDocument = function(documentName, documentBody, action) {
+	saveDocument = function(documentName, documentBody, privateFlag) {
 		console.log(documentName + ' ' + documentBody);
-		var saveMessage = { action : action, text : documentBody, name: documentName };
+		var saveMessage = { action : 'save', text : documentBody, name: documentName, priv : privateFlag };
 		socket.send(saveMessage);
 		$('#closeFileNameTrigger').trigger('click');
 		$('#documentNameHeader').text(documentName);
@@ -159,6 +163,25 @@ $(document).ready( function() {
 			}
 		});
 
+		var selection;
+
+		$(editorBody).on('mouseup', function() {
+			selection = rangy.getSelection(editorIframe).toHtml();
+			console.log('Selected text: ' + selection);			
+		});
+
+		sendRemoveText = function(doc, text, position) {
+			message = {id : doc, action: "msg", op : { type :"r", text : text, pos : position}};
+			console.log('Sending remove message: ' + text + ' on pos: ' + position);
+			socket.send(message);
+		}
+
+		sendInsertText = function(doc, text, position) {
+			message = {id : doc, action: "msg", op : { type :"i", text : text, pos : position}};
+			console.log('Sending insert message: ' + text + ' on pos: ' + position);
+			socket.send(message);
+		}
+
 		$(editorDocument).on('keyup', function(event) {
 			if (bodyBeforeOperation == null) {
 				bodyBeforeOperation = "";
@@ -167,53 +190,93 @@ $(document).ready( function() {
 			console.log('Current body: ' + editorBody.innerHTML);
 			console.log('Pressed key in frame: ' + event.key);
 			console.log(event);
-			console.log('Selected text: ' + editorIframe.getSelection());
+			console.log('Selected text: ');
+			console.log(selection);
 			var key = event.key;
 			var index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
 			var changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length);
 			console.log('Change length: ' + changeLength);
 			if (key.length == 1) {
 				var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
+				//TODO: fix when selected just one character
+				//TODO: fix when typing in character same as selection start
 				if (changeLength < 1) {
+					//no changes
 					bodyBeforeOperation = editorBody.innerHTML;
 					return;
-				} else if (changeLength > 1 && text !== '</p>') {		    		
-					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-					console.log('Sending remove message: ' + text + ' on pos: ' + index);
-					socket.send(message);
+				} else if (selection.length > 1) {
+					//remove selection and add new text		    		
+					sendRemoveText(documentId, text, index);
+					var text = editorBody.innerHTML.substring(index, index + changeLength);
+					sendInsertText(documentId, key, index);
+				} else {
+					//simple add text
+					var text = editorBody.innerHTML.substring(index, index + changeLength);
+					sendInsertText(documentId, text, index);
 				}
-				message = {id : documentId, action: "msg", op : { type :"i", text : key, pos : index}};
-				console.log('Sending insert message: ' + key + ' on pos: ' + index);
-				socket.send(message);
 			} else if (key === 'Enter') {
 				console.log('enter');
-				if (changeLength > '</p><p><br>'.length) {
-					var text = bodyBeforeOperation.substring(index, index + changeLength + 1);
-					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-					console.log('Sending remove message: ' + text + ' on pos: ' + index);
-					socket.send(message);
+				if (selection.length > 1) {
+					//replaces selection with new line
+					//TODO: fix selection ending with the end of line
+					//TODO: fix selection of single line
+					//TODO: fix selection starting with start of line <- big problem since <p> after selecton dissapear
+					var text = bodyBeforeOperation.substring(index, index + changeLength + 7);
+					sendRemoveText(documentId, text, index);
+					sendInsertText(documentId, '</p><p>', index);
+				} else {
+					//simple new line add
+					var text = editorBody.innerHTML.substring(index, index + changeLength);
+					sendInsertText(documentId, text, index);
 				}
-				message = {id : documentId, action: "msg", op : { type :"i", text : '<p></p>', pos : index}};
-				console.log('Sending insert message: ' + key + ' on pos: ' + index);
-				socket.send(message);
 			} else if (key === 'Backspace') {
+				console.log('backspace');
 				if (editorBody.innerHTML === '' || editorBody.innerHTML === '<br>' ) {
+					//prevents from removing <p> on empty document
 					editorBody.innerHTML = '<p></br></p>';
 				} else {
 					console.log('backspace');
-					var text = bodyBeforeOperation.substring(index, index + changeLength);
-					message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-					console.log('Sending remove message: ' + text + ' on pos: ' + index);
-					socket.send(message);
+					if (selection.length === 0 && changeLength === 3) {
+						//when backspacing character after space iframe adds <br>
+						var text = bodyBeforeOperation.substring(index, index + 1);
+						sendRemoveText(documentId, text, index);
+						sendInsertText(documentId, '<br>', index);
+					} else {
+						//simple remove
+						var text = bodyBeforeOperation.substring(index, index + changeLength);
+						sendRemoveText(documentId, text, index);
+					}
 				}
 			} else if (key === 'Delete') {
 				console.log('delete');
-				var text = bodyBeforeOperation.substring(index, index + changeLength);
-				message = {id : documentId, action: "msg", op : { type :"r", text : text, pos : index}};
-				console.log('Sending remove message: ' + text + ' on pos: ' + index);
-				socket.send(message);
+				console.log(text);
+				console.log(selection.length);
+				console.log(changeLength);
+				if (selection.length === 0) {
+					if (changeLength === 4) {
+						//when deleting character before space iframe changes space into &nbsp;
+						var text = bodyBeforeOperation.substring(index, index + 2);
+						sendRemoveText(documentId, text, index);
+						sendInsertText(documentId, '&nbsp;', index);
+					} else if (changeLength === 3) {
+						//when deleting character before new line iframe adds <br>
+						var text = bodyBeforeOperation.substring(index, index + 1);
+						sendRemoveText(documentId, text, index);
+						sendInsertText(documentId, '<br>', index);
+					} else {
+						//simple remove of character
+						var text = bodyBeforeOperation.substring(index, index + changeLength);
+						sendRemoveText(documentId, text, index);
+					}
+				} else {
+					//simple remove of whole selection
+					//TODO: fix selection starting with start of line
+					var text = bodyBeforeOperation.substring(index, index + changeLength);
+					sendRemoveText(documentId, text, index);
+				}
 			}
 			bodyBeforeOperation = editorBody.innerHTML;
+			selection = '';
 		});
 
 		$('#documentListButton').on('click', function() {
@@ -229,8 +292,9 @@ $(document).ready( function() {
 		$('#saveDocumentButton').unbind("click");
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
-			console.log('New document save button clicked. Name: ' + name);
-			saveDocument(name, '<p><br></p>', 'save');
+			var privateFlag = $('#privateFlag').is(":checked");
+			console.log('New document save button clicked. Name: ' + name + ' is private: ' + privateFlag);
+			saveDocument(name, '<p><br></p>', privateFlag);
 		});
 	});
 
@@ -238,8 +302,9 @@ $(document).ready( function() {
 		$('#saveDocumentButton').unbind("click");
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
-			console.log('Save document save button clicked. Name: ' + name);
-			saveDocument(name, editorBody.innerHTML, 'save');
+			var privateFlag = $('#privateFlag').is(":checked");
+			console.log('Save document save button clicked. Name: ' + name + ', is private: ' + privateFlag);
+			saveDocument(name, editorBody.innerHTML, privateFlag);
 		});
 	});
 

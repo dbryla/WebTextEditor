@@ -5,3 +5,4 @@ class Document(mongoengine.Document):
 	name = mongoengine.fields.StringField(required=True)
 	last_change = mongoengine.fields.DateTimeField()
 	text = mongoengine.fields.StringField()
+	priv = mongoengine.fields.BooleanField()
