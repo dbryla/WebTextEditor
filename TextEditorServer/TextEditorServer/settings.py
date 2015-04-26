@@ -92,6 +92,9 @@ TEMPLATE_LOADERS = (
  'django.template.loaders.filesystem.Loader',
  'django.template.loaders.app_directories.Loader',
 )
+LOGIN_REDIRECT_URL = (
+ '/'
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
