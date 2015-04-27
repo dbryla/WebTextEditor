@@ -14,7 +14,7 @@ from selenium import selenium
 from selenium import webdriver
 import unittest, time
 from pyvirtualdisplay import Display
-import django.contrib.auth.models.AnonymousUser 
+from mongoengine.django.auth import AnonymousUser  
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
@@ -86,18 +86,21 @@ class TestDBManager(TestCase):
 		self.assertTrue(doc.text[0] == ' ')
 
 	def testCreateDocument(self):
-		create_document(DOC_NAME, '')
+		create_document({}, DOC_NAME, '')
 		doc = Doc.objects(name=DOC_NAME)[0]
 		self.assertTrue(doc.text == '')
 		self.assertTrue(doc.name == DOC_NAME)
 		Doc.drop_collection()
-		create_document(DOC_NAME, 'test')
+		create_document({}, DOC_NAME, 'test')
 		doc = Doc.objects(name=DOC_NAME)[0]
 		self.assertTrue(doc.text == 'test')
 		self.assertTrue(doc.name == DOC_NAME)
 
 	def tearDown(self):
 		Doc.drop_collection()
+
+class MockRequest(object):
+	user = AnonymousUser()	
 
 class TestEvents(TestCase):
 
@@ -117,7 +120,7 @@ class TestEvents(TestCase):
 
 	def testHandleList(self):
 		message = {}
-		request = {'user' : AnonymousUser}
+		request = MockRequest()
 		with self.assertRaisesMessage(Http404, 'No Document matches the given query.'):
 			handle_list(message, request)
 		doc = Doc(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
@@ -130,14 +133,13 @@ class TestEvents(TestCase):
 
 	def testHandleCreateDocument(self):
 		msg = {'name': DOC_NAME, 'text': EMPTY_DOC_STRING, 'priv': False}
-		request = {'user' : AnonymousUser}
-		handle_create_document(msg, request)
+		handle_create_document(msg, {})
 		id = msg['id']
 		created_document = Doc.objects(id=id)[0]
 		self.assertTrue(created_document['name'] == DOC_NAME)
 		self.assertTrue(created_document['text'] == EMPTY_DOC_STRING)
 		msg = {'name': DOC_NAME, 'text': SAMPLE_TEXT, 'priv': False}
-		handle_create_document(msg, request)
+		handle_create_document(msg, {})
 		id = msg['id']
 		created_document = Doc.objects(id=id)[0]
 		self.assertTrue(created_document['name'] == DOC_NAME)

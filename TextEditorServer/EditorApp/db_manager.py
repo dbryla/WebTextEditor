@@ -28,7 +28,8 @@ def create_document(request, name, text, priv=False):
 	document.priv = priv
 	document.save()
 	if priv == True:
-		request.user.user_permissions.append(document.to_dbref())
-		request.user.save()
+		user = request.user
+		user.user_permissions.append(document.to_dbref())
+		user.save()
 	logger.info("Document created with id: " + str(document.id))
 	return document.id
