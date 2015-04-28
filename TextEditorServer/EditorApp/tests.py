@@ -248,7 +248,8 @@ class TestGoogleDrive(unittest.TestCase):
 		driver.find_element_by_id("authorizeGDriveLink").click()
 		time.sleep(1)
 		driver.switch_to_window(driver.window_handles[1])
-		self.assertEqual(u"Logowanie – Konta Google", driver.title)
+		self.assertTrue(u"Logowanie – Konta Google" ==  driver.title 
+			or u'Sign in - Google Accounts' == driver.title)
 	
 	def tearDown(self):
 		self.driver.quit()
