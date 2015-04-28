@@ -225,3 +225,32 @@ class TestUI(unittest.TestCase):
 		self.assertEqual([], self.verificationErrors)
 		self.display.stop()
 		Doc.drop_collection()
+
+class TestGoogleDrive(unittest.TestCase):
+	def setUp(self):
+		self.display = Display(visible=0, size=(800, 600))
+		self.display.start()
+		self.driver = webdriver.Firefox()
+		self.driver.implicitly_wait(30)
+		self.base_url = "http://localhost:8000"
+		self.verificationErrors = []
+		self.accept_next_alert = True
+	
+	def testLoginWindow(self):
+		Doc(name=DOC_NAME, text=LOREM_IPSUM).save()
+		driver = self.driver
+		time.sleep(5)
+		driver.get(self.base_url + "/")
+		time.sleep(5)
+		driver.find_element_by_css_selector("td").click()
+		time.sleep(5)
+		driver.find_element_by_class_name("has-menu").click()
+		driver.find_element_by_id("authorizeGDriveLink").click()
+		time.sleep(1)
+		driver.switch_to_window(driver.window_handles[1])
+		self.assertEqual(u"Logowanie – Konta Google", driver.title)
+	
+	def tearDown(self):
+		self.driver.quit()
+		self.assertEqual([], self.verificationErrors)
+		self.display.stop()
