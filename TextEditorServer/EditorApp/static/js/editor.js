@@ -71,6 +71,8 @@ $(document).ready( function() {
 		$('#closeFileNameTrigger').trigger('click');
 		$('#documentNameHeader').text(documentName);
 	}
+	
+	
 
 	String.prototype.insert = function (index, string) {
 		if (index > 0) {
@@ -180,6 +182,24 @@ $(document).ready( function() {
 			message = {id : doc, action: "msg", op : { type :"i", text : text, pos : position}};
 			console.log('Sending insert message: ' + text + ' on pos: ' + position);
 			socket.send(message);
+		}
+		
+		formatText = function(tag) {
+			var text = rangy.getSelection(document2);
+			var start = text.anchorOffset;
+			var end = text.focusOffset;
+			rangy.getSelection(document2).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+			if (text.anchorNode === text.focusNode) {
+				rangy.getSelection(document2).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+			} else {
+				rangy.getSelection(document2).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+			}
+			updateStyleTags(tag);
+		}
+		
+		updateStyleTag = function(tag) {
+			document2body.innerHTML = document2body.innerHTML.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
+			document2body.innerHTML = document2body.innerHTML.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
 		}
 
 		$(editorDocument).on('keyup', function(event) {
@@ -308,4 +328,24 @@ $(document).ready( function() {
 		});
 	});
 
+	$('#boldText').on('click', function() {
+		$('#boldText').unbind("click");
+		$('#boldText').on('click', function() {
+			formatText('b');
+		});
+	});
+	
+	$('#italicText').on('click', function() {
+		$('#italicText').unbind("click");
+		$('#italicText').on('click', function() {
+			formatText('i');
+		});
+	});
+	
+	$('#underlineText').on('click', function() {
+		$('#underlineText').unbind("click");
+		$('#underlineText').on('click', function() {
+			formatText('u');
+		});
+	});
 });

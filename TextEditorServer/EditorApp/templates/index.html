@@ -40,7 +40,7 @@
 			img.src = '{{STATIC_URL}}img/emotikon.jpeg';
 			content.appendChild(img);
 			return false;
-		} 
+		}
 	}
 
 
@@ -54,6 +54,7 @@
 	<ul id="menu" class="menu">
 		<li><a><span class="icon"></span>File</a>
 			<ul>
+				<li><a data-reveal-id="fileNameModal" data-animation="fadeAndPop"><i class="fa fa-file-text-o"></i> New document</a></li>
 				<li><a><i class="fa fa-upload"></i> Upload</a></li>
 				<li><a><i class="fa fa-download"></i> Download as...</a>
 					<ul>
@@ -104,9 +105,9 @@
 	<ul class="button-bar">
 		<li><a id="newDocument" data-reveal-id="fileNameModal" data-animation="fadeAndPop"><i class="fa fa-file-text-o"></i></a></li>
 		<li><a id="saveDocument" data-reveal-id="fileNameModal" data-animation="fadeAndPop"><i class="fa fa-floppy-o"></i></a></li>
-		<li><a><i class="fa fa-bold"></i></a></li>
-		<li><a><i class="fa fa-italic"></i> </a></li>
-		<li><a><i class="fa fa-underline"></i> </a></li>
+		<li><a id="boldText"><i class="fa fa-bold"></i></a></li>
+		<li><a id="italicText"><i class="fa fa-italic"></i> </a></li>
+		<li><a id="underlineText"><i class="fa fa-underline"></i> </a></li>
 		<li><a><i class="fa fa-link"></i></a></li>
 		<li><a><i class="fa fa-font"></i></a></li>
 		<li><a><i class="fa fa-align-left"></i></a></li>
