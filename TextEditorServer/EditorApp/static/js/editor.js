@@ -185,21 +185,21 @@ $(document).ready( function() {
 		}
 		
 		formatText = function(tag) {
-			var text = rangy.getSelection(document2);
+			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
 			var end = text.focusOffset;
-			rangy.getSelection(document2).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+			rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
 			if (text.anchorNode === text.focusNode) {
-				rangy.getSelection(document2).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+				rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
 			} else {
-				rangy.getSelection(document2).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+				rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
 			}
-			updateStyleTags(tag);
+			updateStyleTag(tag);
 		}
 		
 		updateStyleTag = function(tag) {
-			document2body.innerHTML = document2body.innerHTML.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
-			document2body.innerHTML = document2body.innerHTML.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
+			editorBody.innerHTML = editorBody.innerHTML.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
+			editorBody.innerHTML = editorBody.innerHTML.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
 		}
 
 		$(editorDocument).on('keyup', function(event) {
