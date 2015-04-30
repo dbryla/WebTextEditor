@@ -54,7 +54,7 @@
 	<ul id="menu" class="menu">
 		<li><a><span class="icon"></span>File</a>
 			<ul>
-				<li><a data-reveal-id="fileNameModal" data-animation="fadeAndPop"><i class="fa fa-file-text-o"></i> New document</a></li>
+				<li><a id="newDocumentMenu" href="#" onclick="newDocAtStart()"><i class="fa fa-file-text-o"></i> New document</a></li>
 				<li><a><i class="fa fa-upload"></i> Upload</a></li>
 				<li><a><i class="fa fa-download"></i> Download as...</a>
 					<ul>
@@ -145,6 +145,15 @@
 		<button class="medium" onclick="$('#fileNameModal').trigger('reveal:close');">Cancel</button>
 		<input type="checkbox" id="privateFlag">Private document</input>
 		<a id="closeFileNameTrigger" class="close-reveal-modal"></a>
+		<a id="showFileNameModalTrigger" data-reveal-id="fileNameModal"></a>
+	</div>
+	<div id="fileNameModalAtStart" class="reveal-modal">
+		<label for="documentName">Document name:</label>
+		<input id="documentNameAtStart" type="text" />
+		<button id="saveDocumentButtonAtStart" class="medium green">Save</button>
+		<button class="medium" onclick="swapWindows()">Cancel</button>
+		<input type="checkbox" id="privateFlagAtStart">Private document</input>
+		<a id="showFileNameModalAtStartTrigger" data-reveal-id="fileNameModalAtStart" data-closeonbackgroundclick="false"></a>
 	</div>
 	
 </body>

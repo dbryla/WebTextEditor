@@ -308,7 +308,7 @@ $(document).ready( function() {
 
 	});
 
-	$('#newDocument').on('click', function() {
+	$('#newDocument').on('click', function () {
 		$('#saveDocumentButton').unbind("click");
 		$('#saveDocumentButton').on('click', function() {
 			var name = $('#documentName').val();
@@ -348,4 +348,37 @@ $(document).ready( function() {
 			formatText('u');
 		});
 	});
+
+	swapWindows = function() {
+		$('#fileNameModalAtStart').trigger('reveal:close');
+		$('#fileListModal').reveal({
+     		animation: 'fadeAndPop',
+     		closeonbackgroundclick: false,
+		});
+	}
+
+	newDocAtStart = function() {
+		if (documentId === undefined) {
+			$('#fileListModal').trigger('reveal:close'); 
+			$('#showFileNameModalAtStartTrigger').trigger('click');
+			$('#saveDocumentButtonAtStart').unbind("click");
+			$('#saveDocumentButtonAtStart').on('click', function() {
+				var name = $('#documentNameAtStart').val();
+				var privateFlag = $('#privateFlagAtStart').is(":checked");
+				console.log('New document save button clicked. Name: ' + name + ' is private: ' + privateFlag);
+				saveDocument(name, '<p><br></p>', privateFlag);
+			});
+		} else {
+			$('#fileListModal').trigger('reveal:close'); 
+			$('#showFileNameModalTrigger').trigger('click');
+			$('#saveDocumentButton').unbind("click");
+			$('#saveDocumentButton').on('click', function() {
+				var name = $('#documentName').val();
+				var privateFlag = $('#privateFlag').is(":checked");
+				console.log('New document save button clicked. Name: ' + name + ' is private: ' + privateFlag);
+				saveDocument(name, '<p><br></p>', privateFlag);
+			});
+		}
+	}
+
 });
