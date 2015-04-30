@@ -70,10 +70,76 @@ function createPicker() {
   }
 }
 
+function loadContent(content, googleName) {
+  $('#closeWaitPageTrigger').trigger('click');
+  if (content == null) {
+    alert('Problem while loading document occured.');
+    $('#showFileListTrigger').trigger('click');
+    return;
+  }
+  console.log('Loading iframe editorContent');
+  editorIframe = document.getElementById('editorContent');
+  editorIframe = (editorIframe.contentWindow) ? editorIframe.contentWindow : (editorIframe.contentDocument.document) ? editorIframe.contentDocument.document : editorIframe.contentDocument;
+  editorDocument = editorIframe.document;
+  editorBody = editorDocument.getElementById('editorBody');
+  console.log('Iframe editorContent successfully loaded');
+  editorBody.innerHTML = '<p>' + content + '</p>';
+  var r = confirm("Do you want to save loaded document?");
+   if (r == true) {
+    $('#documentName').val(googleName);
+    $('#saveDocumentButton').unbind("click");
+    $('#saveDocumentButton').on('click', function() {
+      var name = $('#documentName').val();
+      var privateFlag = $('#privateFlag').is(":checked");
+      console.log('Save document save button clicked. Name: ' + name + ', is private: ' + privateFlag);
+      saveDocument(name, editorBody.innerHTML, privateFlag);
+    });
+    $('#showFileNameModalTrigger').trigger('click');
+  } else {
+    alert("All your changes will be lost after application close.");
+  } 
+}
+
 // A simple callback implementation.
 function pickerCallback(data) {
   if (data.action == google.picker.Action.PICKED) {
-    name = data.docs[0].name;
-    console.log('The user selected: ' + name);
+    $('#fileListModal').trigger('reveal:close'); 
+    $('#showWaitPageTrigger').trigger('click');
+    gapi.client.load('drive', 'v2', function() {
+      var request = gapi.client.drive.files.get({
+        'fileId': data.docs[0].id
+      });
+      request.execute(function(resp) {
+        name = data.docs[0].name;
+        downloadFile(resp, loadContent);
+        console.log('The user selected: ' + name);
+      });
+    });
+  }
+}
+
+/**
+ * Download a file's content.
+ *
+ * @param {File} file Drive File instance.
+ * @param {Function} callback Function to call when the request is complete.
+ */
+function downloadFile(file, callback) {
+  if (file.downloadUrl) {
+    var accessToken = gapi.auth.getToken().access_token;
+    var xhr = new XMLHttpRequest();
+    //xhr.open('GET', file.downloadUrl);
+    xhr.open('GET', 'https://www.googleapis.com/drive/v2/files/' + file.id + '?alt=media')
+    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+    xhr.onload = function() {
+      callback(xhr.responseText, file.title);
+    };
+    xhr.onerror = function() {
+      callback(null, null);
+    };
+    xhr.send();
+
+  } else {
+    callback(null);
   }
 }
