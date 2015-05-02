@@ -111,6 +111,6 @@ iframe#editorContent {
     display: none;
 }
 
-#exploreGDrive {
+.authorizedMethods {
     display: none;
 }

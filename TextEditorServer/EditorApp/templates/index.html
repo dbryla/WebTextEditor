@@ -64,12 +64,6 @@
 				</li>
 				<li><a id="documentListButton" href="#" data-reveal-id="fileListModal" data-animation="fadeAndPop">
 				<i class="fa fa-list-alt"></i> Documents list</a></li>
-				<li id="authorizeGDrive">
-					<a id="authorizeGDriveLink" href="#"> Authorize with GoogleDrive</a>
-				</li>
-				<li id="exploreGDrive">
-					<a id="exploreGDriveLink" href="#"> Explore GoogleDrive</a>
-				</li>
 				<li><a href=""><i >Share </i></a></li>
 			</ul>
 		</li>
@@ -84,6 +78,19 @@
 			<ul>
 				<li><a href="createUser/"><i class="fa fa-user-plus"></i> Create</a></li>
 				<li><a href="logout/"><i class="fa fa-sign-out"></i> Logout</a></li>
+			</ul>
+		</li>
+		<li><a id='gDriveIntegration'><span class="icon"></span>Google Drive</a>
+			<ul>
+				<li id="authorizeGDrive">
+					<a id="authorizeGDriveLink" href="#"> Authorize with GoogleDrive</a>
+				</li>
+				<li id="exploreGDrive" class="authorizedMethods">
+					<a id="exploreGDriveLink" href="#"> Explore GoogleDrive</a>
+				</li>
+				<li id="saveGDrive" class="authorizedMethods">
+					<a id="saveGDriveLink" href="#"> Save document on GoogleDrive</a>
+				</li>
 			</ul>
 		</li>
 		<li class="right"> 
@@ -154,6 +161,13 @@
 		<button class="medium" onclick="swapWindows()">Cancel</button>
 		<input type="checkbox" id="privateFlagAtStart">Private document</input>
 		<a id="showFileNameModalAtStartTrigger" data-reveal-id="fileNameModalAtStart" data-closeonbackgroundclick="false"></a>
+	</div>
+	<div id="saveGDriveWindow" class="reveal-modal">
+		<label for="documentName">Document name:</label>
+		<input id="gDriveDocName" type="text" />
+		<button id="saveGDriveDocButton" class="medium green">Save</button>
+		<button class="medium" onclick="$('#fileNameModal').trigger('reveal:close');">Cancel</button>
+		<a id="saveGDriveWindowTrigger" data-reveal-id="saveGDriveWindow"></a>
 	</div>
 	
 </body>

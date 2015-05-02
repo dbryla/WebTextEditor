@@ -16,6 +16,7 @@ $(document).ready( function() {
 	var socket;
 	var documentId = undefined;
 	var selection = '';
+	var offlineMode = false;
 
 
 	function insertAtCaret(areaId,text) {
@@ -32,6 +33,12 @@ $(document).ready( function() {
 
 		var selectedCell = selectedRow.cells[targetCell-1];
 		selectedCell.innerHTML = fillContents;
+	}
+
+	offline = function() {
+		console.log('Unsubscribing from ' + documentId);
+		socket.unsubscribe('id-' + documentId);
+		offlineMode = true;
 	}
 
 	prepareDocument = function(unsubscribeDocumentId, subscribeDocumentId) {
