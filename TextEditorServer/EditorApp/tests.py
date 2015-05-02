@@ -244,7 +244,7 @@ class TestGoogleDrive(unittest.TestCase):
 		time.sleep(5)
 		driver.find_element_by_css_selector("td").click()
 		time.sleep(5)
-		driver.find_element_by_class_name("has-menu").click()
+		driver.find_element_by_id("gDriveIntegration").click()
 		driver.find_element_by_id("authorizeGDriveLink").click()
 		time.sleep(1)
 		driver.switch_to_window(driver.window_handles[1])
