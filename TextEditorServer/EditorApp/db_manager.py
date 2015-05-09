@@ -33,3 +33,10 @@ def create_document(request, name, text, priv=False):
 		user.save()
 	logger.info("Document created with id: " + str(document.id))
 	return document.id
+
+def update_document(document, text):
+	logger.info("Updating document " + str(document["id"]) + " with text " + text)
+	document["last_change"] = datetime.datetime.now()
+	document["text"] = text
+	document.save()
+	logger.info("Document updated")

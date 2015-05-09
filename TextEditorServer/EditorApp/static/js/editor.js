@@ -1,5 +1,7 @@
 $(document).ready( function() {
 
+	Offline.options = {checks: {xhr: {url: '/login'}}};
+
 	showWaitPage = function() {
 		$('#showWaitPageTrigger').trigger('click');
 	}
@@ -17,6 +19,24 @@ $(document).ready( function() {
 	var documentId = undefined;
 	var selection = '';
 	var offlineMode = false;
+	var noDocumentReplace = false;
+
+	Offline.on('down', function () {
+        console.log('Going offline!');
+        console.log(socket);
+        $('#localSave').show();
+        offline();
+        noDocumentReplace = true;
+    });
+
+    Offline.on('up', function () {
+        console.log('Going back online!!');
+        console.log(socket);
+        $('#localSave').hide();
+        offlineMode = false;
+        socket.connect('http://127.0.0.1');
+        //socket.subscribe('id-' + documentId);
+    });
 
 
 	function insertAtCaret(areaId,text) {
@@ -119,9 +139,14 @@ $(document).ready( function() {
 		$('#showFileListTrigger').trigger('click');
 		//subscribe
 		socket.on('connect', function() {
-			console.log('Subscribing for document list');
-			socket.subscribe('list');
-			console.log('Subscribed for document list');
+			if (documentId === undefined) {
+				console.log('Subscribing for document list');
+				socket.subscribe('list');
+				console.log('Subscribed for document list');
+			} else {
+				console.log('Reconnecting... ' + documentId);
+				socket.subscribe('id-' + documentId);
+			}
 		});
 
 		socket.on('message', function(data) {
@@ -129,10 +154,21 @@ $(document).ready( function() {
 			console.log(data);
 			//recieved full document from server
 			if (data.action === 'doc') {
-				console.log('Action = doc, current content: ' + editorBody.innerHTML);
-				editorBody.innerHTML = data.text;
-				bodyBeforeOperation = data.text;
-				console.log('Replaced content with: ' + data.text);
+				if (noDocumentReplace === false) {
+					if (data.override_warning === 'true') {
+						alert('Someone changed content while being in offline mode. Your changes will be overriden.');
+					}
+					console.log('Action = doc, current content: ' + editorBody.innerHTML);
+					editorBody.innerHTML = data.text;
+					bodyBeforeOperation = data.text;
+					console.log('Replaced content with: ' + data.text);
+				} else {
+					console.log('Action = doc, after reconnection');
+					var message = {id : documentId, action : 'doc', text : editorBody.innerHTML};
+					socket.send(message);
+					console.log('Sending whole document: ' + message.text);
+					noDocumentReplace = true;
+				}
 			} else if (data.action === 'msg') { //recieved operation from another user
 				operation = data.op;
 				text = operation.text;
@@ -312,7 +348,6 @@ $(document).ready( function() {
 			socket.send(message);
 		});
 
-
 	});
 
 	$('#newDocument').on('click', function () {
@@ -387,5 +422,10 @@ $(document).ready( function() {
 			});
 		}
 	}
+
+	$('#localSave').on('click', function() {
+		console.log(editorBody.innerHTML);
+	});
+
 
 });

@@ -74,6 +74,11 @@ def message(request, socket, context, message):
 		handle_create_document(message, request)
 		message["text"] = ""
 		socket.send(message)
+	elif message["action"] == "doc":
+		document = get_document_or_404(Document, id = message["id"])
+		update_document(document, message["text"])
+		message["override_warning"] = "true"
+		socket.broadcast_channel(message)
 		
 
 @events.on_connect
