@@ -338,9 +338,10 @@ $(document).ready( function() {
 		}
 		
 		clearEmptyTags = function(tag) {
-			var text = editorBody.innerHTML;
-			text = text.replace('<' + tag + '></' + tag + '>', '');
-			editorBody.innerHTML = text;
+			console.log('Removing empty tags: ' + tag + 'from: ' + editorBody.innerHTML);
+			var regex = new RegExp('<' + tag + '><\/' + tag + '>', 'g');
+			editorBody.innerHTML = editorBody.innerHTML.replace(regex, '');
+			console.log('After removing: ' + editorBody.innerHTML);
 		}
 		
 		checkChildes = function(parentNode, tag) {
