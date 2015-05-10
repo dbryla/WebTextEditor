@@ -232,16 +232,27 @@ $(document).ready( function() {
 			var parentStart = text.anchorNode.parentNode;
 			var parentEnd = text.focusNode.parentNode;
 			var flag = false;
-			$(parentStart).siblings().each(function() {
-				if (this === parentStart) {
+			var isStartStart;
+			$(parentStart).siblings().andSelf().each(function() {
+				if (flag == false && this === parentStart) {
 					flag = true;
+					isStartStart = true;
+				}
+				
+				if (flag == false && this === parentEnd) {
+					flag = true;
+					isStartStart = false;
 				}
 				
 				if (flag) {
 					this.style.textAlign = direction;
 				}
 				
-				if (this === parentEnd) {
+				if (this === parentEnd && isStartStart == true) {
+					return false;
+				}
+				
+				if (this === parentStart && isStartStart == false) {
 					return false;
 				}
 			});
@@ -273,7 +284,7 @@ $(document).ready( function() {
 			}
 			var startFirst = true;
 			
-			$(parentANode).siblings().each(function() {
+			$(parentANode).siblings().andSelf().each(function() {
 				if (this === text.anchorNode) {
 					return false;
 				}
@@ -310,7 +321,7 @@ $(document).ready( function() {
 			
 			if (endInTag) {
 				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '<' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 4), '<' + tag + '>', text.focusNode.textContent.slice(end + 4)].join('');
 				} else {
 					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
 				}
@@ -486,52 +497,31 @@ $(document).ready( function() {
 	});
 
 	$('#boldText').on('click', function() {
-		$('#boldText').unbind("click");
-		$('#boldText').on('click', function() {
-			formatText('b');
-		});
+		formatText('b');
 	});
 	
 	$('#italicText').on('click', function() {
-		$('#italicText').unbind("click");
-		$('#italicText').on('click', function() {
-			formatText('i');
-		});
+		formatText('i');
 	});
 	
 	$('#underlineText').on('click', function() {
-		$('#underlineText').unbind("click");
-		$('#underlineText').on('click', function() {
-			formatText('u');
-		});
+		formatText('u');
 	});
 	
 	$('#alignLeft').on('click', function() {
-		$('#alignLeft').unbind("click");
-		$('#alignLeft').on('click', function() {
-			setAlignment('left');
-		});
+		setAlignment('left');
 	});
 	
 	$('#alignCenter').on('click', function() {
-		$('#alignCenter').unbind("click");
-		$('#alignCenter').on('click', function() {
-			setAlignment('center');
-		});
+		setAlignment('center');
 	});
 	
 	$('#alignJustify').on('click', function() {
-		$('#alignJustify').unbind("click");
-		$('#alignJustify').on('justify', function() {
-			setAlignment('justify');
-		});
+		setAlignment('justify');
 	});
 	
 	$('#alignRight').on('click', function() {
-		$('#alignRight').unbind("click");
-		$('#alignRight').on('click', function() {
-			setAlignment('right');
-		});
+		setAlignment('right');
 	});
 
 	swapWindows = function() {
