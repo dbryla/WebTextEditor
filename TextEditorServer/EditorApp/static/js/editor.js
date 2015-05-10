@@ -334,6 +334,13 @@ $(document).ready( function() {
 			}
 			
 			replaceTags(tag);
+			clearEmptyTags(tag);
+		}
+		
+		clearEmptyTags = function(tag) {
+			var text = editorBody.innerHTML;
+			text = text.replace('<' + tag + '></' + tag + '>', '');
+			editorBody.innerHTML = text;
 		}
 		
 		checkChildes = function(parentNode, tag) {
