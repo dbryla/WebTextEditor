@@ -323,7 +323,6 @@ $(document).ready( function() {
 			}
 			
 			replaceTags(tag);
-			updateStyleTags(tag);
 		}
 		
 		checkChildes = function(parentNode, tag) {
@@ -331,13 +330,6 @@ $(document).ready( function() {
 				return true;
 			}
 			return false;
-		}
-		
-		updateStyleTag = function(tag) {
-			var text = editorBody.innerHTML;
-			text = text.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
-			text = text.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
-			editorBody.innerHTML = text;
 		}
 		
 		replaceTags = function(tag) {
