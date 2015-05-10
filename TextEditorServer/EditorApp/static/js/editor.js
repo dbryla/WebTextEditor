@@ -227,22 +227,145 @@ $(document).ready( function() {
 			socket.send(message);
 		}
 		
+		setAlignment = function(direction) {
+			var text = rangy.getSelection(editorIframe);
+			var parentStart = text.anchorNode.parentNode;
+			var parentEnd = text.focusNode.parentNode;
+			var flag = false;
+			$(parentStart).siblings().each(function() {
+				if (this === parentStart) {
+					flag = true;
+				}
+				
+				if (flag) {
+					this.style.textAlign = direction;
+				}
+				
+				if (this === parentEnd) {
+					return false;
+				}
+			});
+		}
+		
 		formatText = function(tag) {
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
 			var end = text.focusOffset;
-			rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
-			if (text.anchorNode === text.focusNode) {
-				rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
-			} else {
-				rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+			var startInTag = false;
+			var endInTag = false;
+			
+			if (text.anchorNode == text.focusNode) {
+				if (start == end) {
+					return;
+				} else 
+				if (start > end) {
+					var cosiek = start;
+					start = end;
+					end = cosiek;
+				}
 			}
-			updateStyleTag(tag);
+			
+			var parentANode;
+			if (text.anchorNode.localName == null) {
+				parentANode = text.anchorNode.parentNode;
+			} else {
+				parentANode = text.anchorNode;
+			}
+			var startFirst = true;
+			
+			$(parentANode).siblings().each(function() {
+				if (this === text.anchorNode) {
+					return false;
+				}
+				if (this === text.focusNode) {
+					startFirst = false;
+					return false;
+				}
+			});
+			
+			if (!startFirst) {
+				var tmpNode = text.anchorNode;
+				text.anchorNode = text.focusNode;
+				text.focusNode = tmpNode;
+				var tmp = start;
+				start = end;
+				end = tmp;
+			}
+			
+			var parentNode = text.focusNode.parentNode;
+			if (checkChildes(parentNode, tag)) {
+				startInTag = true;
+			}
+			parentNode = text.focusNode.parentNode;
+			
+			if (checkChildes(parentNode, tag)) {
+				endInTag = true;
+			}
+			
+			if (startInTag) {
+				rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '</' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+			} else {
+				rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+			}
+			
+			if (endInTag) {
+				if (text.anchorNode === text.focusNode) {
+					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '<' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+				} else {
+					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+				}
+			} else {
+				if (text.anchorNode === text.focusNode) {
+					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+				} else {
+					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+				}
+			}
+			
+			replaceTags(tag);
+			updateStyleTags(tag);
+		}
+		
+		checkChildes = function(parentNode, tag) {
+			if (parentNode.localName == tag) {
+				return true;
+			}
+			return false;
 		}
 		
 		updateStyleTag = function(tag) {
-			editorBody.innerHTML = editorBody.innerHTML.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
-			editorBody.innerHTML = editorBody.innerHTML.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
+			var text = editorBody.innerHTML;
+			text = text.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
+			text = text.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
+			editorBody.innerHTML = text;
+		}
+		
+		replaceTags = function(tag) {
+			var text = editorBody.innerHTML;
+			var regexStart = new RegExp('<' + tag + '>', 'g');
+			var regexEnd = new RegExp('</' + tag + '>', 'g');
+			var regexAll = new RegExp('(<' + tag + '>|</' + tag + '>)', 'g');
+			var startIndex = text.indexOf('&lt;' + tag + '&gt;');
+			var endIndex = text.indexOf('&lt;/' + tag + '&gt;');
+			if (startIndex == -1) {
+				startIndex = text.indexOf('&lt;/' + tag + '&gt;', endIndex + 1);
+			}
+			if (endIndex == -1) {
+				endIndex = text.indexOf('&lt;' + tag + '&gt;', startIndex + 1);
+			}
+			if (startIndex > endIndex) {
+				var tmp = startIndex;
+				startIndex = endIndex;
+				endIndex = tmp;
+			}
+			var selectedText = text.substring(startIndex, endIndex + 10);
+			var newSelectedText = selectedText;
+			newSelectedText = newSelectedText.replace(regexAll, function($1) {
+				 return $1 === '<' + tag + '>' ? '</' + tag + '>'  : '<' + tag + '>';
+			});
+			newSelectedText = newSelectedText.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
+			newSelectedText = newSelectedText.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
+			editorBody.innerHTML = editorBody.innerHTML.replace(selectedText, newSelectedText);
 		}
 
 		$(editorDocument).on('keyup', function(event) {
@@ -388,6 +511,34 @@ $(document).ready( function() {
 		$('#underlineText').unbind("click");
 		$('#underlineText').on('click', function() {
 			formatText('u');
+		});
+	});
+	
+	$('#alignLeft').on('click', function() {
+		$('#alignLeft').unbind("click");
+		$('#alignLeft').on('click', function() {
+			setAlignment('left');
+		});
+	});
+	
+	$('#alignCenter').on('click', function() {
+		$('#alignCenter').unbind("click");
+		$('#alignCenter').on('click', function() {
+			setAlignment('center');
+		});
+	});
+	
+	$('#alignJustify').on('click', function() {
+		$('#alignJustify').unbind("click");
+		$('#alignJustify').on('justify', function() {
+			setAlignment('justify');
+		});
+	});
+	
+	$('#alignRight').on('click', function() {
+		$('#alignRight').unbind("click");
+		$('#alignRight').on('click', function() {
+			setAlignment('right');
 		});
 	});
 
