@@ -256,6 +256,7 @@ $(document).ready( function() {
 					return false;
 				}
 			});
+			propagateChanges();
 		}
 		
 		formatText = function(tag) {
@@ -264,7 +265,9 @@ $(document).ready( function() {
 			var end = text.focusOffset;
 			var startInTag = false;
 			var endInTag = false;
-			
+			var bodyBeforeTagging = editorBody.innerHTML;
+			console.log('Before tagging: ' + bodyBeforeTagging);
+
 			if (text.anchorNode == text.focusNode) {
 				if (start == end) {
 					return;
@@ -332,9 +335,18 @@ $(document).ready( function() {
 					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
 				}
 			}
-			
 			replaceTags(tag);
 			clearEmptyTags(tag);
+			var bodyAfterTagging = editorBody.innerHTML;
+			console.log('After tagging: ' + bodyAfterTagging);
+			propagateChanges(bodyBeforeTagging, bodyAfterTagging, tag);
+			bodyBeforeOperation = bodyAfterTagging;
+		}
+
+		propagateChanges = function(bodyBefore, bodyAfter, tag) {
+			//temporary solution
+			var message = {id : documentId, action : 'doc', text : editorBody.innerHTML, override_warning : 'false'};
+			socket.send(message);
 		}
 		
 		clearEmptyTags = function(tag) {
@@ -352,17 +364,22 @@ $(document).ready( function() {
 		}
 		
 		replaceTags = function(tag) {
+			console.log('Replacing Tags');
 			var text = editorBody.innerHTML;
-			var regexStart = new RegExp('<' + tag + '>', 'g');
-			var regexEnd = new RegExp('</' + tag + '>', 'g');
+			var toReplaceOpeneningTag = '&lt;' + tag + '&gt;';
+			var toReplaceClosingTag = '&lt;/' + tag + '&gt;';
+			var openingTag = '<' + tag + '>';
+			var closingTag = '</' + tag + '>';
+			var regexStart = new RegExp(openingTag, 'g');
+			var regexEnd = new RegExp(closingTag, 'g');
 			var regexAll = new RegExp('(<' + tag + '>|</' + tag + '>)', 'g');
-			var startIndex = text.indexOf('&lt;' + tag + '&gt;');
-			var endIndex = text.indexOf('&lt;/' + tag + '&gt;');
+			var startIndex = text.indexOf(toReplaceOpeneningTag);
+			var endIndex = text.indexOf(toReplaceClosingTag);
 			if (startIndex == -1) {
-				startIndex = text.indexOf('&lt;/' + tag + '&gt;', endIndex + 1);
+				startIndex = text.indexOf(toReplaceClosingTag, endIndex + 1);
 			}
 			if (endIndex == -1) {
-				endIndex = text.indexOf('&lt;' + tag + '&gt;', startIndex + 1);
+				endIndex = text.indexOf(toReplaceOpeneningTag, startIndex + 1);
 			}
 			if (startIndex > endIndex) {
 				var tmp = startIndex;
@@ -371,11 +388,8 @@ $(document).ready( function() {
 			}
 			var selectedText = text.substring(startIndex, endIndex + 10);
 			var newSelectedText = selectedText;
-			newSelectedText = newSelectedText.replace(regexAll, function($1) {
-				 return $1 === '<' + tag + '>' ? '</' + tag + '>'  : '<' + tag + '>';
-			});
-			newSelectedText = newSelectedText.replace('&lt;' + tag + '&gt;', '<' + tag + '>');
-			newSelectedText = newSelectedText.replace('&lt;/' + tag + '&gt;', '</' + tag + '>');
+			newSelectedText = newSelectedText.replace(toReplaceOpeneningTag, openingTag);
+			newSelectedText = newSelectedText.replace(toReplaceClosingTag, closingTag);
 			editorBody.innerHTML = editorBody.innerHTML.replace(selectedText, newSelectedText);
 		}
 
