@@ -24,7 +24,7 @@ $(document).ready( function() {
 	Offline.on('down', function () {
         console.log('Going offline!');
         console.log(socket);
-        $('#localSave').show();
+        //$('#localSave').show();
         offline();
         noDocumentReplace = true;
     });
@@ -32,9 +32,15 @@ $(document).ready( function() {
     Offline.on('up', function () {
         console.log('Going back online!!');
         console.log(socket);
-        $('#localSave').hide();
+        //$('#localSave').hide();
         offlineMode = false;
         socket.connect('http://127.0.0.1');
+		if (documentId === undefined) {
+			socket.subscribe('list');
+		} else {
+			socket.subscribe('id-' + documentId);
+		}
+        // online();
         //socket.subscribe('id-' + documentId);
     });
 
@@ -55,9 +61,21 @@ $(document).ready( function() {
 		selectedCell.innerHTML = fillContents;
 	}
 
+	online = function() {
+		offlineMode = false;
+		console.log(documentId);
+		if (documentId === undefined) {
+			socket.subscribe('list');
+		} else {
+			socket.subscribe('id-' + documentId);
+		}
+	}
+
 	offline = function() {
+		console.log(documentId);
 		console.log('Unsubscribing from ' + documentId);
 		socket.unsubscribe('id-' + documentId);
+		documentId = undefined;
 		offlineMode = true;
 	}
 
@@ -154,6 +172,7 @@ $(document).ready( function() {
 			console.log(data);
 			//recieved full document from server
 			if (data.action === 'doc') {
+				console.log('No document replace: ' + noDocumentReplace);
 				if (noDocumentReplace === false) {
 					if (data.override_warning === 'true') {
 						alert('Someone changed content while being in offline mode. Your changes will be overriden.');
@@ -500,7 +519,11 @@ $(document).ready( function() {
 
 	$('#newDocument').on('click', function () {
 		$('#saveDocumentButton').unbind("click");
+		editorBody.innerHTML = '<p><br></p>';
 		$('#saveDocumentButton').on('click', function() {
+			if (offlineMode == true) {
+				online();
+			}
 			var name = $('#documentName').val();
 			var privateFlag = $('#privateFlag').is(":checked");
 			console.log('New document save button clicked. Name: ' + name + ' is private: ' + privateFlag);
@@ -511,6 +534,9 @@ $(document).ready( function() {
 	$('#saveDocument').on('click', function() {
 		$('#saveDocumentButton').unbind("click");
 		$('#saveDocumentButton').on('click', function() {
+			if (offlineMode == true) {
+				online();
+			}
 			var name = $('#documentName').val();
 			var privateFlag = $('#privateFlag').is(":checked");
 			console.log('Save document save button clicked. Name: ' + name + ', is private: ' + privateFlag);
