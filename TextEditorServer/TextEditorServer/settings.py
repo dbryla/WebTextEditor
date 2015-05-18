@@ -115,6 +115,15 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/home/media/media.lawrence.com/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+MEDIA_URL = '/media/'
+
 
 import logging
 LOG_LEVEL = "DEBUG"
@@ -126,3 +135,6 @@ db_logger.setLevel(LOG_LEVEL)
 events_logger = logging.getLogger('events')
 events_logger.addHandler(log_handler)
 events_logger.setLevel(LOG_LEVEL)
+views_logger = logging.getLogger('views')
+views_logger.addHandler(log_handler)
+views_logger.setLevel(LOG_LEVEL)

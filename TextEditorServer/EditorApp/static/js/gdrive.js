@@ -93,6 +93,7 @@ function createPicker() {
 }
 
 function loadContent(content, googleName) {
+  console.log('Entering loadContent method.');
   $('#closeWaitPageTrigger').trigger('click');
   if (content == null) {
     alert('Problem while loading document occured.');
@@ -129,6 +130,7 @@ function loadContent(content, googleName) {
 
 // A simple callback implementation.
 function pickerCallback(data) {
+  console.log('Entering pickerCallback method.');
   if (data.action == google.picker.Action.PICKED) {
     $('#fileListModal').trigger('reveal:close'); 
     $('#showWaitPageTrigger').trigger('click');
@@ -152,23 +154,29 @@ function pickerCallback(data) {
  * @param {Function} callback Function to call when the request is complete.
  */
 function downloadFile(file, callback) {
+  console.log('Entering donwloadFile method.');
+  console.log(file);
+  console.log(file['mimeType']);
+  var url = '';
   if (file.downloadUrl) {
-    var accessToken = gapi.auth.getToken().access_token;
-    var xhr = new XMLHttpRequest();
-    //xhr.open('GET', file.downloadUrl);
-    xhr.open('GET', 'https://www.googleapis.com/drive/v2/files/' + file.id + '?alt=media')
-    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-    xhr.onload = function() {
-      callback(xhr.responseText, file.title);
-    };
-    xhr.onerror = function() {
-      callback(null, null);
-    };
-    xhr.send();
-
+    url = 'https://www.googleapis.com/drive/v2/files/' + file.id + '?alt=media';
+  } else if (file.exportLinks['text/html']) {
+    url = file.exportLinks['text/html'];
   } else {
     callback(null);
+    return;
   }
+  var accessToken = gapi.auth.getToken().access_token;
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+  xhr.onload = function() {
+    callback(xhr.responseText, file.title);
+  };
+  xhr.onerror = function() {
+    callback(null);
+  };
+  xhr.send();
 }
 
 function saveDocumentOnGDrive(name, content) {
