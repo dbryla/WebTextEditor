@@ -29,22 +29,29 @@ def logoutUser(request):
     logout(request)
     return HttpResponseRedirect("/") 
 
+def saveFile(file_struct):
+    file_name = file_struct._name
+    with io.open('media/' + file_name, 'wb') as file:
+        logger.info('Saving file ' + file_name)
+        file.write(file_struct.file.getvalue())
+    return file_name
+
 def upload(request):
     # Handle file upload
     if request.method == 'POST':
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
+            logger.debug('File with type ' + request.FILES['docfile'].content_type + ' uploaded.')
             if request.FILES['docfile'].content_type ==  u'application/vnd.oasis.opendocument.text':
-                file_name = request.FILES['docfile']._name
-                with io.open('media/' + file_name, 'wb') as file:
-                    logger.info('Saving file ' + file_name)
-                    file.write(request.FILES['docfile'].file.getvalue())
+                file_name = saveFile(request.FILES['docfile'])
                 logger.info('Converting file ' + file_name)
                 content = subprocess.check_output(['OdtConverter/odt2html', '-x', 'OdtConverter/odt2html.xsl', 'media/' + file_name])
                 logger.info('Deleting file ' + file_name)
                 os.remove('media/' + file_name)
                 logger.info('Saving imported document ' + file_name)
                 create_document(None, file_name, content)
+            elif request.FILES['docfile'].content_type[:5] == u'image':
+                saveFile(request.FILES['docfile'])
             else:
                 form = FileForm()
                 form.error = 'Invalid type of document.'
