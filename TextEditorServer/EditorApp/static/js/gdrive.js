@@ -174,7 +174,7 @@ function downloadFile(file, callback) {
 function saveDocumentOnGDrive(name, content) {
   gapi.client.load('drive', 'v2', function() {
     console.log('Saving document on Google Drive with name: ' + name);
-    file = new File([content], name, {'type': 'text/plain'});
+    file = new File([content], name, {'type': 'text/html'});
     insertFile(file);        
   });
 }
