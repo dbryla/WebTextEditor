@@ -77,7 +77,7 @@ def message(request, socket, context, message):
 	elif message["action"] == "doc":
 		document = get_document_or_404(Document, id = message["id"])
 		update_document(document, message["text"])
-		if message["override_warning"] is None:
+		if "override_warning" not in message:
 			message["override_warning"] = "true"
 		socket.broadcast_channel(message)
 		
