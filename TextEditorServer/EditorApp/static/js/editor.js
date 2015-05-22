@@ -111,7 +111,7 @@ $(document).ready( function() {
 
 	saveDocument = function(documentName, documentBody, privateFlag) {
 		console.log(documentName + ' ' + documentBody);
-		var saveMessage = { action : 'save', text : documentBody, name: documentName, priv : privateFlag };
+		var saveMessage = { action : 'save', text : btoa(documentBody), name: documentName, priv : privateFlag };
 		socket.send(saveMessage);
 		$('#closeFileNameTrigger').trigger('click');
 		$('#documentNameHeader').text(documentName);
