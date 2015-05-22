@@ -12,7 +12,7 @@ from db_manager import create_document
 logger = logging.getLogger('views')
 
 def createUser(request):
-    print request.POST
+    logger.debug(request.POST)
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():

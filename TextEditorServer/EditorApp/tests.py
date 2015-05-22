@@ -8,13 +8,16 @@ from django.http import Http404
 from bson.errors import InvalidId
 from db_manager import *
 from events import *
+from views import *
 import datetime
 import os
 from selenium import selenium
 from selenium import webdriver
 import unittest, time
 from pyvirtualdisplay import Display
-from mongoengine.django.auth import AnonymousUser  
+from mongoengine.django.auth import AnonymousUser, User
+from forms import UserForm, FileForm
+from django.shortcuts import render
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
@@ -121,15 +124,15 @@ class TestEvents(TestCase):
 	def testHandleList(self):
 		message = {}
 		request = MockRequest()
-		with self.assertRaisesMessage(Http404, 'No Document matches the given query.'):
-			handle_list(message, request)
+		handle_list(message, request)
+		self.assertEqual(len(message['files']), 0)
 		doc = Doc(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
 		handle_list(message, request)
-		self.assertTrue(len(message['files']), 1)
+		self.assertEqual(len(message['files']), 1)
 		self.assertTrue(message['files'][0]['name'] == DOC_NAME)
 		doc = Doc(name=DOC_NAME + '1', last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
 		handle_list(message, request)
-		self.assertTrue(len(message['files']), 2)
+		self.assertEqual(len(message['files']), 2)
 
 	def testHandleCreateDocument(self):
 		msg = {'name': DOC_NAME, 'text': EMPTY_DOC_STRING, 'priv': False}
@@ -160,6 +163,7 @@ class TestUI(unittest.TestCase):
 		self.accept_next_alert = True
 
 	def testRead(self):
+		Doc.drop_collection()
 		Doc(name=DOC_NAME, text=LOREM_IPSUM).save()
 		driver = self.driver
 		time.sleep(1)
@@ -220,11 +224,24 @@ class TestUI(unittest.TestCase):
 		driver.find_element_by_id("saveDocumentButton").click()
 		self.assertTrue(Doc.objects(name=DOC_NAME)[0]['text'] == EMPTY_DOC_STRING)
 
+	def testCreateUser(self):
+		USER_NAME = 'test12'
+		driver = self.driver
+		driver.get(self.base_url + "createUser/")
+		time.sleep(1)
+		driver.find_element_by_id("id_username").clear()
+		driver.find_element_by_id("id_username").send_keys(USER_NAME)
+		driver.find_element_by_id("id_password").clear()
+		driver.find_element_by_id("id_password").send_keys(USER_NAME)
+		driver.find_element_by_css_selector("input[type=\"submit\"]").click()
+		self.assertEqual(len(User.objects(username = USER_NAME)), 1)
+
 	def tearDown(self):
 		self.driver.quit()
 		self.assertEqual([], self.verificationErrors)
 		self.display.stop()
 		Doc.drop_collection()
+		User.drop_collection()
 
 class TestGoogleDrive(unittest.TestCase):
 	def setUp(self):
@@ -255,3 +272,28 @@ class TestGoogleDrive(unittest.TestCase):
 		self.driver.quit()
 		self.assertEqual([], self.verificationErrors)
 		self.display.stop()
+
+class MockRequestWithMethod():
+	
+	def __init__(self, method, post):
+		self.method = method
+		self.POST = post
+		self.META = {"CSRF_COOKIE_USED": True}
+
+class TestViews(unittest.TestCase):
+
+	def testCreateUser(self):
+		request = MockRequestWithMethod('POST', {'username': 'test', 'password': 'test'})
+		self.assertTrue(isinstance(createUser(request), HttpResponseRedirect))
+		request = MockRequestWithMethod('POST', {'username': 'test1', 'password': ''})
+		self.assertEqual(str(createUser(request)), str(render(request, 'registration/createUser.html', 
+			{'form': UserForm(), 'error': 'Invalid username or password, can not be empty'})))
+		request = MockRequestWithMethod('POST', {'username': 'test', 'password': 'test'})
+		self.assertEqual(str(createUser(request)), str(render(request, 'registration/createUser.html', 
+			{'form': UserForm(), 'error': 'User exists'})))
+		request = MockRequestWithMethod('GET', {})
+		self.assertEqual(str(createUser(request)), str(render(request, 'registration/createUser.html', 
+														{'form': UserForm()})))
+
+	def tearDown(self):
+		User.drop_collection()

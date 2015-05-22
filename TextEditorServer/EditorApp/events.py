@@ -58,7 +58,7 @@ def handle_list(message, request):
 			message["files"].append(element)
 
 def handle_create_document(message, request):
-	id = create_document(request, message['name'], message["text"].decode('base64'), message['priv'])
+	id = create_document(request, message['name'], message["text"], message['priv'])
 	message["id"] = str(id)
 
 @events.on_message(channel="^")
