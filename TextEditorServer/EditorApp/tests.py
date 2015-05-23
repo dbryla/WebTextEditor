@@ -18,6 +18,7 @@ from pyvirtualdisplay import Display
 from mongoengine.django.auth import AnonymousUser, User
 from forms import UserForm, FileForm
 from django.shortcuts import render
+from selenium.common.exceptions import NoSuchElementException
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_ALIAS = 'testdb'
@@ -25,6 +26,8 @@ SAMPLE_TEXT = u'Użytkownik może wyświetlić i modyfikować dokument z jego za
 DOC_NAME = 'TestDocument'
 EMPTY_DOC_STRING = '<p><br></p>'
 LOREM_IPSUM = '<p>Lorem ipsum.</p>'
+
+logger = logging.getLogger('tests')
 
 class TestEnv(TestCase):
 
@@ -51,7 +54,7 @@ class TestDB(TestCase):
 			Doc(id='piec', name='DOC_NAME').save()
 
 	def tearDown(self):
-		Doc.drop_collection()
+		Doc.objects.delete()
 
 class TestDBManager(TestCase):
 
@@ -60,9 +63,10 @@ class TestDBManager(TestCase):
 		creation_date = doc.last_change
 		insert_text(doc, 'A', 3)
 		doc = Doc.objects(name=DOC_NAME)[0]
+		logger.debug('TestDBManager::testInsertText compare ' + str(creation_date) + ' and ' + str(doc.last_change))
 		self.assertTrue(creation_date < doc.last_change)
 		self.assertTrue(doc.text[3] == 'A')
-		Doc.drop_collection()
+		Doc.objects.delete()
 		doc = Doc(name=DOC_NAME, text="").save()
 		insert_text(doc, 'k', 0)
 		insert_text(doc, 'o', 0)
@@ -73,9 +77,10 @@ class TestDBManager(TestCase):
 		creation_date = doc.last_change
 		remove_text(doc, 'Uzytkownik', 0)
 		doc = Doc.objects(name=DOC_NAME)[0]
+		logger.debug('TestDBManager::testRemoveText compare ' + str(creation_date) + ' and ' + str(doc.last_change))
 		self.assertTrue(creation_date < doc.last_change)
 		self.assertTrue(doc.text[0] == ' ')
-		Doc.drop_collection()
+		Doc.objects.delete()
 		doc = Doc(name=DOC_NAME, text="ok").save()
 		remove_text(doc, 'o', 0)
 		remove_text(doc, 'k', 0)
@@ -83,7 +88,6 @@ class TestDBManager(TestCase):
 
 	def testPolishCharacters(self):
 		doc = Doc(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
-		creation_date = doc.last_change
 		remove_text(doc, u'Użytkownik', 0)
 		doc = Doc.objects(name=DOC_NAME)[0]
 		self.assertTrue(doc.text[0] == ' ')
@@ -93,14 +97,14 @@ class TestDBManager(TestCase):
 		doc = Doc.objects(name=DOC_NAME)[0]
 		self.assertTrue(doc.text == '')
 		self.assertTrue(doc.name == DOC_NAME)
-		Doc.drop_collection()
+		Doc.objects.delete()
 		create_document({}, DOC_NAME, 'test')
 		doc = Doc.objects(name=DOC_NAME)[0]
 		self.assertTrue(doc.text == 'test')
 		self.assertTrue(doc.name == DOC_NAME)
 
 	def tearDown(self):
-		Doc.drop_collection()
+		Doc.objects.delete()
 
 class MockRequest(object):
 	user = AnonymousUser()	
@@ -112,7 +116,7 @@ class TestEvents(TestCase):
 		handle_msg({'type' : 'i', 'pos' : 0, 'text': 'ala'}, doc['id'])
 		doc = Doc.objects(name=DOC_NAME)[0]
 		self.assertTrue(doc.text[:3] == 'ala')
-		Doc.drop_collection()
+		Doc.objects.delete()
 		doc = Doc(name=DOC_NAME, last_change=datetime.datetime.now(), text=SAMPLE_TEXT).save()
 		handle_msg({'type' : 'r', 'pos' : 0, 'text': u'Użytkownik'}, doc['id'])
 		doc = Doc.objects(name=DOC_NAME)[0]
@@ -149,21 +153,22 @@ class TestEvents(TestCase):
 		self.assertTrue(created_document['text'] == SAMPLE_TEXT)
 
 	def tearDown(self):
-		Doc.drop_collection()
+		Doc.objects.delete()
 
 class TestUI(unittest.TestCase):
 
 	def setUp(self):
+		User.drop_collection()
 		self.display = Display(visible=0, size=(800, 600))
 		self.display.start()
 		self.driver = webdriver.Firefox()
 		self.driver.implicitly_wait(30)
-		self.base_url = "http://localhost:8000/"
+		self.base_url = "http://localhost:8000"
 		self.verificationErrors = []
 		self.accept_next_alert = True
 
 	def testRead(self):
-		Doc.drop_collection()
+		Doc.objects.delete()
 		Doc(name=DOC_NAME, text=LOREM_IPSUM).save()
 		driver = self.driver
 		time.sleep(1)
@@ -206,7 +211,9 @@ class TestUI(unittest.TestCase):
 		time.sleep(1)
 		driver.get(self.base_url)
 		driver.find_element_by_css_selector("td").click()
+		time.sleep(1)
 		driver.find_element_by_id("saveDocument").click()
+		time.sleep(1)
 		driver.find_element_by_id("documentName").clear()
 		driver.find_element_by_id("documentName").send_keys(DOC_NAME)
 		driver.find_element_by_id("saveDocumentButton").click()
@@ -218,32 +225,95 @@ class TestUI(unittest.TestCase):
 		time.sleep(1)
 		driver.get(self.base_url)
 		driver.find_element_by_css_selector("td").click()
+		time.sleep(1)
 		driver.find_element_by_id("newDocument").click()
+		time.sleep(1)
 		driver.find_element_by_id("documentName").clear()
 		driver.find_element_by_id("documentName").send_keys(DOC_NAME)
 		driver.find_element_by_id("saveDocumentButton").click()
 		self.assertTrue(Doc.objects(name=DOC_NAME)[0]['text'] == EMPTY_DOC_STRING)
 
 	def testCreateUser(self):
+		logger.debug('Start TestUI::testCreateUser.')
 		USER_NAME = 'test12'
 		driver = self.driver
-		driver.get(self.base_url + "createUser/")
+		url = self.base_url + '/createUser/'
+		logger.debug('TestUI::testCreateUser try to open browser at ' + url)
+		driver.get(url)
+		logger.debug('TestUI::testCreateUser opened browser at ' + url)
 		time.sleep(1)
 		driver.find_element_by_id("id_username").clear()
 		driver.find_element_by_id("id_username").send_keys(USER_NAME)
 		driver.find_element_by_id("id_password").clear()
 		driver.find_element_by_id("id_password").send_keys(USER_NAME)
 		driver.find_element_by_css_selector("input[type=\"submit\"]").click()
-		self.assertEqual(len(User.objects(username = USER_NAME)), 1)
+		time.sleep(5)
+		self.assertEqual(User.objects().count(), 1)
+		logger.debug('End TestUI::testCreateUser.')
+
+	def testLogin(self):
+		logger.debug('Start TestUI::testLogin.')
+		USER_NAME = 'testLogin'
+		driver = self.driver
+		driver.get(self.base_url)
+		time.sleep(1)
+		driver.find_element_by_css_selector("i.fa.fa-sign-in").click()
+		time.sleep(1)
+		driver.find_element_by_id("id_username").clear()
+		driver.find_element_by_id("id_username").send_keys(USER_NAME)
+		driver.find_element_by_id("id_password").clear()
+		driver.find_element_by_id("id_password").send_keys(USER_NAME)
+		driver.find_element_by_css_selector("input[type=\"submit\"]").click()
+		time.sleep(1)
+		self.assertEqual("Your username and password didn't match. Please try again.", driver.find_element_by_css_selector("p").text)
+		User.create_user(USER_NAME, USER_NAME)
+		time.sleep(1)
+		driver.get(self.base_url)
+		time.sleep(1)
+		driver.find_element_by_css_selector("i.fa.fa-sign-in").click()
+		time.sleep(1)
+		driver.find_element_by_id("id_username").clear()
+		driver.find_element_by_id("id_username").send_keys(USER_NAME)
+		driver.find_element_by_id("id_password").clear()
+		driver.find_element_by_id("id_password").send_keys(USER_NAME)
+		driver.find_element_by_css_selector("input[type=\"submit\"]").click()
+		time.sleep(1)
+		self.assertEqual("Welcome, " + USER_NAME + ".", driver.find_element_by_css_selector("p").text)
+		PRIVATE_DOC_NAME = "prywatny"
+		driver.find_element_by_class_name("has-menu").click()
+		driver.find_element_by_id("newDocumentMenu").click()
+		time.sleep(1)
+		driver.find_element_by_id("documentNameAtStart").clear()
+		driver.find_element_by_id("documentNameAtStart").send_keys(PRIVATE_DOC_NAME)
+		driver.find_element_by_id("privateFlagAtStart").click()
+		driver.find_element_by_id("saveDocumentButtonAtStart").click()
+		time.sleep(1)
+		logger.debug('Critical point of TestUI::testLogin.')
+		doc = Doc.objects()[0]
+		self.assertEqual(doc.name, PRIVATE_DOC_NAME)
+		self.assertTrue(doc.priv)
+		driver.get(self.base_url)
+		time.sleep(1)
+		driver.find_element_by_class_name("has-menu").click()
+		driver.find_element_by_id("documentListButton").click()
+		time.sleep(1)
+		self.assertEqual(PRIVATE_DOC_NAME, driver.find_element_by_css_selector("td").text)
+		driver.find_element_by_id('accounts').click()
+		driver.find_element_by_id("logout").click()
+		time.sleep(1)
+		with self.assertRaises(NoSuchElementException):
+			driver.find_element_by_css_selector("td")
+		logger.debug('End TestUI::testLogin.')
 
 	def tearDown(self):
 		self.driver.quit()
 		self.assertEqual([], self.verificationErrors)
 		self.display.stop()
-		Doc.drop_collection()
+		Doc.objects.delete()
 		User.drop_collection()
-
+ 
 class TestGoogleDrive(unittest.TestCase):
+
 	def setUp(self):
 		self.display = Display(visible=0, size=(800, 600))
 		self.display.start()

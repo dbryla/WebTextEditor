@@ -31,7 +31,6 @@ def connect(request, socket, context, channel):
 	message["action"] = "doc"
 	socket.send(message)
 
-
 def handle_msg(operation, document_id):
 	document = get_document_or_404(Document, id = document_id)
 	if operation["type"] == INSERT:
