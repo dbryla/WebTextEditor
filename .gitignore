@@ -1,4 +1,4 @@
 *.pyc
 *.py~
 TextEditorServer/reports
-**/server.log
+**/*.log

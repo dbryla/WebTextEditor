@@ -173,6 +173,7 @@ class TestUI(unittest.TestCase):
 		driver = self.driver
 		time.sleep(1)
 		driver.get(self.base_url)
+		time.sleep(1)
 		driver.find_element_by_css_selector("td").click()
 		time.sleep(1)
 		driver.switch_to_frame("editorContent")
@@ -207,9 +208,11 @@ class TestUI(unittest.TestCase):
 
 	def testSaveAs(self):
 		Doc(name=DOC_NAME + '1', text=LOREM_IPSUM).save()
+		logger.debug('TestUI::testSaveAs documents: ' + str(Doc.objects()))
 		driver = self.driver
 		time.sleep(1)
 		driver.get(self.base_url)
+		time.sleep(1)
 		driver.find_element_by_css_selector("td").click()
 		time.sleep(1)
 		driver.find_element_by_id("saveDocument").click()
@@ -224,6 +227,7 @@ class TestUI(unittest.TestCase):
 		driver = self.driver
 		time.sleep(1)
 		driver.get(self.base_url)
+		time.sleep(1)
 		driver.find_element_by_css_selector("td").click()
 		time.sleep(1)
 		driver.find_element_by_id("newDocument").click()
@@ -241,7 +245,7 @@ class TestUI(unittest.TestCase):
 		logger.debug('TestUI::testCreateUser try to open browser at ' + url)
 		driver.get(url)
 		logger.debug('TestUI::testCreateUser opened browser at ' + url)
-		time.sleep(1)
+		time.sleep(2)
 		driver.find_element_by_id("id_username").clear()
 		driver.find_element_by_id("id_username").send_keys(USER_NAME)
 		driver.find_element_by_id("id_password").clear()
@@ -251,8 +255,8 @@ class TestUI(unittest.TestCase):
 		self.assertEqual(User.objects().count(), 1)
 		logger.debug('End TestUI::testCreateUser.')
 
-	def testLogin(self):
-		logger.debug('Start TestUI::testLogin.')
+	def testAccount(self):
+		logger.debug('Start TestUI::testAccount.')
 		USER_NAME = 'testLogin'
 		driver = self.driver
 		driver.get(self.base_url)
@@ -287,8 +291,8 @@ class TestUI(unittest.TestCase):
 		driver.find_element_by_id("documentNameAtStart").send_keys(PRIVATE_DOC_NAME)
 		driver.find_element_by_id("privateFlagAtStart").click()
 		driver.find_element_by_id("saveDocumentButtonAtStart").click()
-		time.sleep(1)
-		logger.debug('Critical point of TestUI::testLogin.')
+		time.sleep(10)
+		logger.debug('Critical point of TestUI::testAccount.')
 		doc = Doc.objects()[0]
 		self.assertEqual(doc.name, PRIVATE_DOC_NAME)
 		self.assertTrue(doc.priv)
@@ -303,7 +307,22 @@ class TestUI(unittest.TestCase):
 		time.sleep(1)
 		with self.assertRaises(NoSuchElementException):
 			driver.find_element_by_css_selector("td")
-		logger.debug('End TestUI::testLogin.')
+		logger.debug('End TestUI::testAccount.')
+
+	def testImport(self):
+		driver = self.driver
+		driver.get(self.base_url + "/")
+		time.sleep(1)
+		driver.find_element_by_class_name("has-menu").click()
+		driver.find_element_by_id("import").click()
+		time.sleep(1)
+		path = BASE_DIR + '/test_files/test.odt'
+		logger.debug('Path: ' + path)
+		driver.find_element_by_id("id_docfile").send_keys(path)
+		driver.find_element_by_name("press").click()
+		time.sleep(5)
+		self.assertEqual('test.odt', driver.find_element_by_css_selector("td").text)
+
 
 	def tearDown(self):
 		self.driver.quit()
