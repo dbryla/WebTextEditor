@@ -72,10 +72,14 @@ def upload(request):
 
 def download(request):
     if request.method == 'GET':
+        name = request.GET.get('name')
+        logger.debug('Exporting ' + name)
         result = StringIO()
         pdf = pisa.CreatePDF(StringIO(request.GET.get('text')), result)
         if not pdf.err:
             response = StreamingHttpResponse(result.getvalue(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment;filename=' + str(request.GET.get('name'))
+            response['Content-Disposition'] = 'attachment;filename=' + name
+            logger.debug('Document ' + name + ' was exported successfully')
             return response 
+        logger.debug('Failed in export document ' + name)
     return HttpResponseRedirect('/')
