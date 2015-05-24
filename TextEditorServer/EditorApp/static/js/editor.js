@@ -224,7 +224,7 @@ $(document).ready( function() {
 			} else if (data.action === 'save') {
 				console.log(data);
 				prepareDocument(documentId, data.id);
-			}
+			} 
 		});
 
 		var selection;
@@ -608,5 +608,18 @@ $(document).ready( function() {
 		console.log(editorBody.innerHTML);
 	});
 
+	$('#export').on('click', function() {
+		var name  = $('#documentNameHeader').text() + '.pdf'
+		var text = encodeURIComponent(editorBody.innerHTML);
+		var data = "name=" + name + "&text=" + text; 
+		var url = "/download/?"+data;
+		console.log('Exporting ' + name);
+		var link = document.createElement('a');
+ 		document.body.appendChild(link);
+ 		link.href = url;
+ 		link.download = name;
+ 		console.log(link);
+ 		link.click();
+	});
 
 });

@@ -1,5 +1,5 @@
 from forms import UserForm, FileForm
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import render
 from mongoengine.django.auth import User
 from django.contrib.auth import logout
@@ -8,6 +8,13 @@ import subprocess
 import io
 import os
 from db_manager import create_document
+import xhtml2pdf.pisa as pisa
+
+try:
+    import StringIO
+    StringIO = StringIO.StringIO
+except Exception:
+    from io import StringIO
 
 logger = logging.getLogger('views')
 
@@ -63,3 +70,12 @@ def upload(request):
         form = FileForm() # A empty, unbound form
     return render(request, 'upload.html', {'form': form})
 
+def download(request):
+    if request.method == 'GET':
+        result = StringIO()
+        pdf = pisa.CreatePDF(StringIO(request.GET.get('text')), result)
+        if not pdf.err:
+            response = StreamingHttpResponse(result.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment;filename=' + str(request.GET.get('name'))
+            return response 
+    return HttpResponseRedirect('/')

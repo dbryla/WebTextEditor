@@ -80,7 +80,6 @@ def message(request, socket, context, message):
 		if "override_warning" not in message:
 			message["override_warning"] = "true"
 		socket.broadcast_channel(message)
-		
 
 @events.on_connect
 def socket_connect(request, socket, context):
