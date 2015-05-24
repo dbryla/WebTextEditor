@@ -31,7 +31,6 @@ def connect(request, socket, context, channel):
 	message["action"] = "doc"
 	socket.send(message)
 
-
 def handle_msg(operation, document_id):
 	document = get_document_or_404(Document, id = document_id)
 	if operation["type"] == INSERT:
@@ -47,7 +46,7 @@ def get_user_permissions(request):
 	return user_permissions
 
 def handle_list(message, request):
-	documents_list = get_list_or_404(Document)
+	documents_list = Document.objects
 	message["files"] = []
 	user_permissions = get_user_permissions(request)
 	for document in documents_list:

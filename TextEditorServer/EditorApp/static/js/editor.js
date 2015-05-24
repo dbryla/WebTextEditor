@@ -207,6 +207,7 @@ $(document).ready( function() {
 					editorBody.innerHTML = currentContent.substring(0, pos) + currentContent.substring(pos + length, currentContent.length);
 					console.log('Removed.. new content: ' + editorBody.innerHTML);			
 				}
+				bodyBeforeOperation = editorBody.innerHTML;
 			} else if (data.action === 'list') {
 				console.log('Recieved documents list: ' + data.files.length);
 				$('#documentList').find('tr').remove();
