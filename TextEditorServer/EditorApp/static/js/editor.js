@@ -619,7 +619,6 @@ $(document).ready( function() {
  		document.body.appendChild(link);
  		link.href = url;
  		link.download = name;
- 		console.log(link);
  		link.click();
 	});
 
