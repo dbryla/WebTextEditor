@@ -326,14 +326,38 @@ $(document).ready( function() {
 				end = tmp;
 			}
 			
-			var parentNode = text.focusNode.parentNode;
+			var parentNode = text.anchorNode.parentNode;
 			if (checkChildes(parentNode, tag)) {
 				startInTag = true;
 			}
+			if (text.anchorNode.previousSibling != null) {
+				if (checkChildes(text.anchorNode.previousSibling, tag)) {
+					startInTag = true;
+				}
+			}
+
+			if (text.anchorNode.nextSibling != null) {
+				if (checkChildes(text.anchorNode.nextSibling, tag)) {
+					startInTag = true;
+				}
+			}	
+
 			parentNode = text.focusNode.parentNode;
 			
 			if (checkChildes(parentNode, tag)) {
 				endInTag = true;
+			}
+			
+			if (text.focusNode.previousSibling != null) {
+				if (checkChildes(text.focusNode.previousSibling, tag)) {
+					endInTag = true;
+				}
+			}
+
+			if (text.focusNode.nextSibling) {
+				if (checkChildes(text.focusNode.nextSibling, tag)) {
+					endInTag = true;
+				}
 			}
 			
 			if (startInTag) {
@@ -563,10 +587,6 @@ $(document).ready( function() {
 	
 	$('#alignCenter').on('click', function() {
 		setAlignment('center');
-	});
-	
-	$('#alignJustify').on('click', function() {
-		setAlignment('justify');
 	});
 	
 	$('#alignRight').on('click', function() {
