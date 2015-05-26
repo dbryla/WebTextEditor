@@ -408,6 +408,14 @@ $(document).ready( function() {
 		    return false;
 		}
 		
+		replaceImgTag = function() {
+			var text = editorBody.innerHTML;
+			text = text.replace('&lt;img', '<img');
+			text = text.replace('&lt;/img&gt;', '</img>');
+			text = text.replace('&gt;', '>');
+			editorBody.innerHTML = text;
+		}
+		
 		replaceTags = function(tag) {
 			console.log('Replacing Tags');
 			var text = editorBody.innerHTML;
