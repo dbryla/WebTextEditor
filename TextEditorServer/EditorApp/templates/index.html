@@ -33,7 +33,7 @@
 	{% load socketio_tags %}
 	{% socketio %}
 
-	<script type="text/javascript" charset="utf-8">
+	<!--script type="text/javascript" charset="utf-8"> doesn't work
 	var imageAdder = function(){
 		var emoticon = document.getElementById('emoticons');
 
@@ -44,7 +44,7 @@
 	window.onload = function(){
 		imageAdder();
 	}
-	</script>
+	</script-->
 </head>
 <body>
 	<!-- Menu Horizontal -->
@@ -54,18 +54,18 @@
 				<li><a id="newDocumentMenu" href="#" onclick="newDocAtStart()"><i class="fa fa-file-text-o"></i> New document</a></li>
 				<li><a id="import" href="upload"><i class="fa fa-upload"></i> Import</a></li>
 				<li><a id="export" href="#"><i class="fa fa-file-pdf-o"></i> Export to PDF</a></li>
-				<li><a href="#" id="fileUpload" data-reveal-id="fileUploadModal" data-animation="fadeAndPop"><i class="fa fa-upload"></i> Upload</a></li>
+				<!--li><a href="#" id="fileUpload" data-reveal-id="fileUploadModal" data-animation="fadeAndPop"><i class="fa fa-upload"></i> Upload</a></li doesn't work -->
 				<li><a id="documentListButton" href="#" data-reveal-id="fileListModal" data-animation="fadeAndPop">
 				<i class="fa fa-list-alt"></i> Documents list</a></li>
 			</ul>
 		</li>
-		<li><a><span class="icon"></span>Edit</a>
+		<!--li><a><span class="icon"></span>Edit</a> doesn't work
 			<ul>
 				<li><a><i class="fa fa-clipboard"></i> Paste</a></li>
 				<li><a><i class="fa fa-download"></i> Cut</a></li>
 				<li><a><i class="fa fa-files-o"></i> Copy</a></li> 
 			</ul>
-		</li>
+		</li-->
 		<li><a id='accounts'><span class="icon"></span>Accounts</a>
 			<ul>
 				<li><a href="createUser/"><i class="fa fa-user-plus"></i> Create</a></li>
@@ -99,7 +99,7 @@
 			<h3 id="documentNameHeader">Document Name</h3>
 		</div>
 	</li>
-	<li class="button" id="emoticons"><i class="fa fa-smile-o"></i><a>Emoticons</a></li>
+	<!--li class="button" id="emoticons"><i class="fa fa-smile-o"></i><a>Emoticons</a></li doesn't work-->
 
 	<ul class="button-bar">
 		<li><a id="newDocument" data-reveal-id="fileNameModal" data-animation="fadeAndPop"><i class="fa fa-file-text-o"></i></a></li>

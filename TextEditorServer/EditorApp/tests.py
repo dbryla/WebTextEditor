@@ -256,6 +256,8 @@ class TestUI(unittest.TestCase):
 		logger.debug('End TestUI::testCreateUser.')
 
 	def testAccount(self):
+		# for sure
+		Doc.objects.delete()
 		logger.debug('Start TestUI::testAccount.')
 		USER_NAME = 'testLogin'
 		driver = self.driver

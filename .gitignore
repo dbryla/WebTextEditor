@@ -1,4 +1,5 @@
 *.pyc
 *.py~
 TextEditorServer/reports
+TextEditorServer/media/*.png
 **/*.log
