@@ -33,7 +33,7 @@
 	{% load socketio_tags %}
 	{% socketio %}
 
-	<!--script type="text/javascript" charset="utf-8"> doesn't work
+	<script type="text/javascript" charset="utf-8"> 
 	var imageAdder = function(){
 		var emoticon = document.getElementById('emoticons');
 
@@ -44,7 +44,7 @@
 	window.onload = function(){
 		imageAdder();
 	}
-	</script-->
+	</script>
 </head>
 <body>
 	<!-- Menu Horizontal -->
@@ -99,7 +99,7 @@
 			<h3 id="documentNameHeader">Document Name</h3>
 		</div>
 	</li>
-	<!--li class="button" id="emoticons"><i class="fa fa-smile-o"></i><a>Emoticons</a></li doesn't work-->
+	<li class="button" id="emoticons"><i class="fa fa-smile-o"></i><a>Emoticons</a></li>
 
 	<ul class="button-bar">
 		<li><a id="newDocument" data-reveal-id="fileNameModal" data-animation="fadeAndPop"><i class="fa fa-file-text-o"></i></a></li>
