@@ -44,15 +44,6 @@ $(document).ready( function() {
         //socket.subscribe('id-' + documentId);
     });
 
-
-	function insertAtCaret(areaId,text) {
-		var txtarea = editorBody;
-		var img = editorDocument.createElement('img');
-		img.src = '../img/emotikon.jpeg';
-		txtarea.appendChild(img);
-		return false;
-	}
-
 	function fillCell(table, targetRow, targetCell, fillContents) {
 		var tableObj = document.getElementById(table);
 		var selectedRow = tableObj.rows[targetRow-1];
@@ -405,6 +396,16 @@ $(document).ready( function() {
 				return true;
 			}
 			return false;
+		}
+		
+		insertAtCaret = function(imgName) {
+			imgName = 'emotikon.jpeg';
+			var text = rangy.getSelection(editorIframe);
+			var start = text.anchorOffset;
+			var s = '<img src=../img/' + imgName + '></img>';
+			text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
+			replaceImgTag();
+		    return false;
 		}
 		
 		replaceTags = function(tag) {
