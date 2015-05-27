@@ -13,7 +13,20 @@
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}KS/js/kickstart.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}js/offline.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var socket;
+		var documentId = undefined;
+		var offlineMode = false;
+		var noDocumentReplace = false;
+		var editorBody;
+		var editorIframe;
+		var bodyBeforeOperation;
+	</script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/onlineStatusChecker.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/formatter.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/utils.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}js/editor.js"></script>
+	<script type="text/javascript" src="{{STATIC_URL}}js/messageHandler.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}js/jquery-migrate-1.2.1.min.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}js/jquery.reveal.js"></script>
 	<script type="text/javascript" src="{{STATIC_URL}}js/rangy-core.js"></script>
@@ -26,25 +39,13 @@
 	<script type="text/javascript" src="{{STATIC_URL}}js/simpleStorage.js"></script> 
 
 	<style type="text/css">
-	body { font-family: "HelveticaNeue","Helvetica-Neue", "Helvetica", "Arial", sans-serif; }
-	.big-link { display:block; margin-top: 100px; text-align: center; font-size: 70px; color: #06f; }
+		body { font-family: "HelveticaNeue","Helvetica-Neue", "Helvetica", "Arial", sans-serif; }
+		.big-link { display:block; margin-top: 100px; text-align: center; font-size: 70px; color: #06f; }
 	</style>
 
 	{% load socketio_tags %}
 	{% socketio %}
 
-	<script type="text/javascript" charset="utf-8"> 
-	var imageAdder = function(){
-		var emoticon = document.getElementById('emoticons');
-
-		emoticon.onclick = insertAtCaret;
-	}
-
-
-	window.onload = function(){
-		imageAdder();
-	}
-	</script>
 </head>
 <body>
 	<!-- Menu Horizontal -->

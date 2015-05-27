@@ -1,49 +1,27 @@
 $(document).ready( function() {
-
-	Offline.options = {checks: {xhr: {url: '/login'}}};
-
+	/**
+	 *	Displays "Please wait" modal.
+	 */
 	showWaitPage = function() {
 		$('#showWaitPageTrigger').trigger('click');
 	}
 
+	/**
+	 *	Hides "Please wait" modal.
+	 */
 	hideWaitPage = function() {
 		$('#closeWaitPageTrigger').trigger('click');
 	}
 
 	showWaitPage();
 
-	var editorIframe;
 	var editorDocument;
-	var editorBody;
-	var socket;
-	var documentId = undefined;
 	var selection = '';
-	var offlineMode = false;
-	var noDocumentReplace = false;
 
-	Offline.on('down', function () {
-        console.log('Going offline!');
-        console.log(socket);
-        //$('#localSave').show();
-        offline();
-        noDocumentReplace = true;
-    });
 
-    Offline.on('up', function () {
-        console.log('Going back online!!');
-        console.log(socket);
-        //$('#localSave').hide();
-        offlineMode = false;
-        socket.connect('http://127.0.0.1');
-		if (documentId === undefined) {
-			socket.subscribe('list');
-		} else {
-			socket.subscribe('id-' + documentId);
-		}
-        // online();
-        //socket.subscribe('id-' + documentId);
-    });
-
+	/**
+	 *	Updates table's [targetRow][TargetCell] element with fillContents.
+	 */
 	function fillCell(table, targetRow, targetCell, fillContents) {
 		var tableObj = document.getElementById(table);
 		var selectedRow = tableObj.rows[targetRow-1];
@@ -52,24 +30,10 @@ $(document).ready( function() {
 		selectedCell.innerHTML = fillContents;
 	}
 
-	online = function() {
-		offlineMode = false;
-		console.log(documentId);
-		if (documentId === undefined) {
-			socket.subscribe('list');
-		} else {
-			socket.subscribe('id-' + documentId);
-		}
-	}
 
-	offline = function() {
-		console.log(documentId);
-		console.log('Unsubscribing from ' + documentId);
-		socket.unsubscribe('id-' + documentId);
-		documentId = undefined;
-		offlineMode = true;
-	}
-
+	/**
+	 *	Prepares for opened/saved document - this includes unsubscribing from old channel and subscribing to new one.
+	 */
 	prepareDocument = function(unsubscribeDocumentId, subscribeDocumentId) {
 		if (unsubscribeDocumentId !== undefined) {
 			console.log('Unsubscribing from ' + unsubscribeDocumentId);
@@ -83,6 +47,9 @@ $(document).ready( function() {
 		documentId = subscribeDocumentId;
 	}
 
+	/**
+	 *	Handler for selecting document from list.
+	 */
 	selectDocument = function(element) {
 		selectedDocumentId = $(element).closest('tr').attr('id');
 		prepareDocument(documentId, selectedDocumentId);
@@ -100,6 +67,10 @@ $(document).ready( function() {
 		}
 	}
 
+
+	/**
+	 *	Prepares and sends message to socket with information about saving document.
+	 */
 	saveDocument = function(documentName, documentBody, privateFlag) {
 		console.log(documentName + ' ' + documentBody);
 		var saveMessage = { action : 'save', text : documentBody, name: documentName, priv : privateFlag };
@@ -108,29 +79,6 @@ $(document).ready( function() {
 		$('#documentNameHeader').text(documentName);
 	}
 	
-	
-
-	String.prototype.insert = function (index, string) {
-		if (index > 0) {
-			return this.substring(0, index) + string + this.substring(index, this.length);
-		}
-		else {
-			return string + this;
-		}
-	};
-
-	String.prototype.indexOfFirstDifference = function(s, caseInsensitive){
-		var l = this.length, i=-1;
-		while(++i<l){
-			if (!s[i]) {return i}
-				var diff = caseInsensitive 
-			? this[i].toUpperCase() !== s[i].toUpperCase() 
-			: this[i] !== s[i];
-			if ( diff ) {  return i; }
-		}
-		return s.length>l ? l : null;
-	};
-
 	$('iframe#editorContent').load(function() {
 		console.log('Loading iframe editorContent');
 		editorIframe = document.getElementById('editorContent');
@@ -139,7 +87,6 @@ $(document).ready( function() {
 		editorDocument = editorIframe.document;
 		editorBody = editorDocument.getElementById('editorBody');
 		console.log('Iframe editorContent successfully loaded');
-		var bodyBeforeOperation;
 
 		socket = new io.Socket();
 		socket.connect('http://127.0.0.1');
@@ -158,67 +105,6 @@ $(document).ready( function() {
 			}
 		});
 
-		socket.on('message', function(data) {
-			console.log('Recieved message');
-			console.log(data);
-			//recieved full document from server
-			if (data.action === 'doc') {
-				console.log('No document replace: ' + noDocumentReplace);
-				if (noDocumentReplace === false) {
-					if (data.override_warning === 'true') {
-						alert('Someone changed content while being in offline mode. Your changes will be overriden.');
-					}
-					console.log('Action = doc, current content: ' + editorBody.innerHTML);
-					editorBody.innerHTML = data.text;
-					bodyBeforeOperation = data.text;
-					console.log('Replaced content with: ' + data.text);
-				} else {
-					console.log('Action = doc, after reconnection');
-					var message = {id : documentId, action : 'doc', text : editorBody.innerHTML};
-					socket.send(message);
-					console.log('Sending whole document: ' + message.text);
-					noDocumentReplace = true;
-				}
-			} else if (data.action === 'msg') { //recieved operation from another user
-				operation = data.op;
-				text = operation.text;
-				pos = operation.pos;
-				currentContent = editorBody.innerHTML;
-				console.log('Recieved message: ' + data);
-				if (operation.type === 'i') {
-					console.log('Inserting: ' + text + ' on pos: ' + pos);
-					currentContent = currentContent.insert(pos, text);
-					editorBody.innerHTML = currentContent;
-					console.log('Inserted.. new content: ' + editorBody.innerHTML);
-					//$('.webDocument').html(currentContent);
-					//console.log($('.webDocument').html());
-				} else if (operation.type === 'r') {
-					console.log('Removing: ' + text + ' from pos: ' + pos);
-					length = text.length
-					editorBody.innerHTML = currentContent.substring(0, pos) + currentContent.substring(pos + length, currentContent.length);
-					console.log('Removed.. new content: ' + editorBody.innerHTML);			
-				}
-				bodyBeforeOperation = editorBody.innerHTML;
-			} else if (data.action === 'list') {
-				console.log('Recieved documents list: ' + data.files.length);
-				$('#documentList').find('tr').remove();
-				$.each(data.files, function() {
-					console.log(this);
-					var documentRow = $('<tr>', {
-						id: this.id,
-						onmouseover: 'changeBackgroundColor(this, true);', 
-						onmouseout: 'changeBackgroundColor(this, false);', 
-						onclick: 'selectDocument(this);return false;'
-					});
-					documentRow.append($('<td>').append(this.name));
-					$('#documentList').append(documentRow);
-				});
-			} else if (data.action === 'save') {
-				console.log(data);
-				prepareDocument(documentId, data.id);
-			} 
-		});
-
 		var selection;
 
 		$(editorBody).on('mouseup', function() {
@@ -226,178 +112,25 @@ $(document).ready( function() {
 			console.log('Selected text: ' + selection);			
 		});
 
+
+		/**
+		 *	Prepares and sends message on socket with information about text to be removed from document on specified position.
+		 */
 		sendRemoveText = function(doc, text, position) {
 			message = {id : doc, action: "msg", op : { type :"r", text : text, pos : position}};
 			console.log('Sending remove message: ' + text + ' on pos: ' + position);
 			socket.send(message);
 		}
 
+		/**
+		 *	Prepares and sends message on socket with information about text to be inserted into document on specified position.
+		 */
 		sendInsertText = function(doc, text, position) {
 			message = {id : doc, action: "msg", op : { type :"i", text : text, pos : position}};
 			console.log('Sending insert message: ' + text + ' on pos: ' + position);
 			socket.send(message);
 		}
-		
-		setAlignment = function(direction) {
-			var text = rangy.getSelection(editorIframe);
-			var parentStart = text.anchorNode.parentNode;
-			var parentEnd = text.focusNode.parentNode;
-			var flag = false;
-			var isStartStart;
-			$(parentStart).siblings().andSelf().each(function() {
-				if (flag == false && this === parentStart) {
-					flag = true;
-					isStartStart = true;
-				}
 				
-				if (flag == false && this === parentEnd) {
-					flag = true;
-					isStartStart = false;
-				}
-				
-				if (flag) {
-					this.style.textAlign = direction;
-				}
-				
-				if (this === parentEnd && isStartStart == true) {
-					return false;
-				}
-				
-				if (this === parentStart && isStartStart == false) {
-					return false;
-				}
-			});
-			propagateChanges();
-		}
-		
-		formatText = function(tag) {
-			var text = rangy.getSelection(editorIframe);
-			var start = text.anchorOffset;
-			var end = text.focusOffset;
-			var startInTag = false;
-			var endInTag = false;
-			var bodyBeforeTagging = editorBody.innerHTML;
-			console.log('Before tagging: ' + bodyBeforeTagging);
-
-			if (text.anchorNode == text.focusNode) {
-				if (start == end) {
-					return;
-				} else 
-				if (start > end) {
-					var cosiek = start;
-					start = end;
-					end = cosiek;
-				}
-			}
-			
-			var parentANode;
-			if (text.anchorNode.localName == null) {
-				parentANode = text.anchorNode.parentNode;
-			} else {
-				parentANode = text.anchorNode;
-			}
-			var startFirst = true;
-			
-			$(parentANode).siblings().andSelf().each(function() {
-				if (this === text.anchorNode) {
-					return false;
-				}
-				if (this === text.focusNode) {
-					startFirst = false;
-					return false;
-				}
-			});
-			
-			if (!startFirst) {
-				var tmpNode = text.anchorNode;
-				text.anchorNode = text.focusNode;
-				text.focusNode = tmpNode;
-				var tmp = start;
-				start = end;
-				end = tmp;
-			}
-			
-			var parentNode = text.anchorNode.parentNode;
-			if (checkChildes(parentNode, tag)) {
-				startInTag = true;
-			}
-			if (text.anchorNode.previousSibling != null) {
-				if (checkChildes(text.anchorNode.previousSibling, tag)) {
-					startInTag = true;
-				}
-			}
-
-			if (text.anchorNode.nextSibling != null) {
-				if (checkChildes(text.anchorNode.nextSibling, tag)) {
-					startInTag = true;
-				}
-			}	
-
-			parentNode = text.focusNode.parentNode;
-			
-			if (checkChildes(parentNode, tag)) {
-				endInTag = true;
-			}
-			
-			if (text.focusNode.previousSibling != null) {
-				if (checkChildes(text.focusNode.previousSibling, tag)) {
-					endInTag = true;
-				}
-			}
-
-			if (text.focusNode.nextSibling) {
-				if (checkChildes(text.focusNode.nextSibling, tag)) {
-					endInTag = true;
-				}
-			}
-			
-			if (startInTag) {
-				rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '</' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
-			} else {
-				rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
-			}
-			
-			if (endInTag) {
-				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 4), '<' + tag + '>', text.focusNode.textContent.slice(end + 4)].join('');
-				} else {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
-				}
-			} else {
-				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
-				} else {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
-				}
-			}
-			replaceTags(tag);
-			clearEmptyTags(tag);
-			var bodyAfterTagging = editorBody.innerHTML;
-			console.log('After tagging: ' + bodyAfterTagging);
-			propagateChanges(bodyBeforeTagging, bodyAfterTagging, tag);
-			bodyBeforeOperation = bodyAfterTagging;
-		}
-
-		propagateChanges = function(bodyBefore, bodyAfter, tag) {
-			//temporary solution
-			var message = {id : documentId, action : 'doc', text : editorBody.innerHTML, override_warning : 'false'};
-			socket.send(message);
-		}
-		
-		clearEmptyTags = function(tag) {
-			console.log('Removing empty tags: ' + tag + 'from: ' + editorBody.innerHTML);
-			var regex = new RegExp('<' + tag + '><\/' + tag + '>', 'g');
-			editorBody.innerHTML = editorBody.innerHTML.replace(regex, '');
-			console.log('After removing: ' + editorBody.innerHTML);
-		}
-		
-		checkChildes = function(parentNode, tag) {
-			if (parentNode.localName == tag) {
-				return true;
-			}
-			return false;
-		}
-		
 		insertAtCaret = function(imgName) {
 			imgName = 'emotikon.jpeg';
 			var text = rangy.getSelection(editorIframe);
@@ -416,36 +149,6 @@ $(document).ready( function() {
 			editorBody.innerHTML = text;
 		}
 		
-		replaceTags = function(tag) {
-			console.log('Replacing Tags');
-			var text = editorBody.innerHTML;
-			var toReplaceOpeneningTag = '&lt;' + tag + '&gt;';
-			var toReplaceClosingTag = '&lt;/' + tag + '&gt;';
-			var openingTag = '<' + tag + '>';
-			var closingTag = '</' + tag + '>';
-			var regexStart = new RegExp(openingTag, 'g');
-			var regexEnd = new RegExp(closingTag, 'g');
-			var regexAll = new RegExp('(<' + tag + '>|</' + tag + '>)', 'g');
-			var startIndex = text.indexOf(toReplaceOpeneningTag);
-			var endIndex = text.indexOf(toReplaceClosingTag);
-			if (startIndex == -1) {
-				startIndex = text.indexOf(toReplaceClosingTag, endIndex + 1);
-			}
-			if (endIndex == -1) {
-				endIndex = text.indexOf(toReplaceOpeneningTag, startIndex + 1);
-			}
-			if (startIndex > endIndex) {
-				var tmp = startIndex;
-				startIndex = endIndex;
-				endIndex = tmp;
-			}
-			var selectedText = text.substring(startIndex, endIndex + 10);
-			var newSelectedText = selectedText;
-			newSelectedText = newSelectedText.replace(toReplaceOpeneningTag, openingTag);
-			newSelectedText = newSelectedText.replace(toReplaceClosingTag, closingTag);
-			editorBody.innerHTML = editorBody.innerHTML.replace(selectedText, newSelectedText);
-		}
-
 		$(editorDocument).on('keyup', function(event) {
 			if (bodyBeforeOperation == null) {
 				bodyBeforeOperation = "";
@@ -578,30 +281,6 @@ $(document).ready( function() {
 		});
 	});
 
-	$('#boldText').on('click', function() {
-		formatText('b');
-	});
-	
-	$('#italicText').on('click', function() {
-		formatText('i');
-	});
-	
-	$('#underlineText').on('click', function() {
-		formatText('u');
-	});
-	
-	$('#alignLeft').on('click', function() {
-		setAlignment('left');
-	});
-	
-	$('#alignCenter').on('click', function() {
-		setAlignment('center');
-	});
-	
-	$('#alignRight').on('click', function() {
-		setAlignment('right');
-	});
-
 	swapWindows = function() {
 		$('#fileNameModalAtStart').trigger('reveal:close');
 		$('#fileListModal').reveal({
@@ -649,6 +328,10 @@ $(document).ready( function() {
  		link.href = url;
  		link.download = name;
  		link.click();
+	});
+
+	$('#emoticons').on('click', function() {
+		insertAtCaret();
 	});
 
 });
