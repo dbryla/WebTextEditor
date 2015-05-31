@@ -131,11 +131,11 @@ $(document).ready( function() {
 			socket.send(message);
 		}
 				
-		insertAtCaret = function(imgName, staticPath) {
+		insertAtCaret = function(imgName, path) {
 			console.log('Inserting image ' + imgName);
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
-			var s = '<img src=' + staticPath + 'img/' + imgName + '></img>';
+			var s = '<img src=' + path + 'img/' + imgName + '></img>';
 			text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
 			replaceImgTag();
 		    return false;

@@ -55,7 +55,7 @@
 				<li><a id="newDocumentMenu" href="#" onclick="newDocAtStart()"><i class="fa fa-file-text-o"></i> New document</a></li>
 				<li><a id="import" href="upload"><i class="fa fa-upload"></i> Import</a></li>
 				<li><a id="export" href="#"><i class="fa fa-file-pdf-o"></i> Export to PDF</a></li>
-				<!--li><a href="#" id="fileUpload" data-reveal-id="fileUploadModal" data-animation="fadeAndPop"><i class="fa fa-upload"></i> Upload</a></li doesn't work -->
+				<li><a href="#" id="fileUpload" data-reveal-id="fileUploadModal" data-animation="fadeAndPop"><i class="fa fa-upload"></i> Upload</a></li>
 				<li><a id="documentListButton" href="#" data-reveal-id="fileListModal" data-animation="fadeAndPop">
 				<i class="fa fa-list-alt"></i> Documents list</a></li>
 			</ul>
@@ -164,11 +164,10 @@
 	<div id="fileUploadModal" class="reveal-modal">
 		<label>Upload file:</label>
 		<div id="dropzone">
-			<form action="upload/" class="dropzone" id="my-awesome-dropzone"> {% csrf_token %}
-				<div class="dz-message">
-				    Drop files here or click to upload.<br />
-				    <span class="note">(This is just a demo dropzone. Selected files are <strong>not</strong> actually uploaded.)</span>
-				  </div>
+			<form action="{% url "upload" %}" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				 <input id="id_docfile" name="docfile" type="file" />
+				 <button class="medium"  name="press" value="Upload" type="submit">Submit</button>
 			</form>
 		</div>
 	</div>
