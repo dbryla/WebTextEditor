@@ -131,11 +131,11 @@ $(document).ready( function() {
 			socket.send(message);
 		}
 				
-		insertAtCaret = function(imgName) {
-			imgName = 'emotikon.jpeg';
+		insertAtCaret = function(imgName, staticPath) {
+			console.log('Inserting image ' + imgName);
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
-			var s = '<img src=../img/' + imgName + '></img>';
+			var s = '<img src=' + staticPath + 'img/' + imgName + '></img>';
 			text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
 			replaceImgTag();
 		    return false;
@@ -319,7 +319,7 @@ $(document).ready( function() {
 
 	$('#export').on('click', function() {
 		var name  = $('#documentNameHeader').text() + '.pdf'
-		var text = encodeURIComponent(editorBody.innerHTML);
+		var text = encodeURIComponent(editorBody.innerHTML.replace('<img src=\"/static', '<img src=\"EditorApp/static'));
 		var data = "name=" + name + "&text=" + text; 
 		var url = "/download/?"+data;
 		console.log('Exporting ' + name);
@@ -328,10 +328,6 @@ $(document).ready( function() {
  		link.href = url;
  		link.download = name;
  		link.click();
-	});
-
-	$('#emoticons').on('click', function() {
-		insertAtCaret();
 	});
 
 });
