@@ -132,10 +132,10 @@ $(document).ready( function() {
 		}
 				
 		insertAtCaret = function(imgName, path) {
-			console.log('Inserting image ' + imgName);
+			console.log('Inserting image ' + path + imgName);
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
-			var s = '<img src=' + path + 'img/' + imgName + '></img>';
+			var s = '<img src=' + path + imgName + '></img>';
 			text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
 			replaceImgTag();
 		    return false;
@@ -330,4 +330,10 @@ $(document).ready( function() {
  		link.click();
 	});
 
+	$('#linkSubmitButton').on('click', function() {
+		var link = $('#linkInputValue').val();
+		insertAtCaret(link, '');
+		$('#linkInputValue').val('');
+		$('#linkUploadModalTrigger').trigger('click');
+	});
 });
