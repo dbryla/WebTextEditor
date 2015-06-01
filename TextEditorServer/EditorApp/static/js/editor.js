@@ -136,7 +136,11 @@ $(document).ready( function() {
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
 			var s = '<img src=' + path + imgName + '></img>';
-			text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
+			if (text.anchorNode.nodeValue == null) {
+				text.anchorNode.textContent = s;
+			} else {
+				text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
+			}
 			replaceImgTag();
 		    return false;
 		}
