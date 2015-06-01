@@ -4,6 +4,7 @@
 $(document).ready( function() {
 
 	$('iframe#editorContent').load(function() {
+
 		socket.on('message', function(data) {
 			console.log('Recieved message');
 			console.log(data);
@@ -30,6 +31,8 @@ $(document).ready( function() {
 				operation = data.op;
 				text = operation.text;
 				pos = operation.pos;
+				var savedSel = rangy.saveSelection(editorIframe);
+				var savedSelActiveElement = document.activeElement;
 				currentContent = editorBody.innerHTML;
 				console.log('Recieved message: ' + data);
 				if (operation.type === 'i') {
@@ -45,6 +48,15 @@ $(document).ready( function() {
 					editorBody.innerHTML = currentContent.substring(0, pos) + currentContent.substring(pos + length, currentContent.length);
 					console.log('Removed.. new content: ' + editorBody.innerHTML);			
 				}
+				//console.log(document.activeElement);
+				//console.log(editorDocument.activeElement);
+				console.log('Restoring selection!');
+				rangy.restoreSelection(savedSel, true);
+				window.setTimeout(function() {
+                    if (savedSelActiveElement && typeof savedSelActiveElement.focus != "undefined") {
+                        savedSelActiveElement.focus();
+                    }
+                }, 1);
 				bodyBeforeOperation = editorBody.innerHTML;
 			// recieved list of available documents
 			} else if (data.action === 'list') {

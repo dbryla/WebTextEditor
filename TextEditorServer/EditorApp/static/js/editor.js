@@ -15,7 +15,7 @@ $(document).ready( function() {
 
 	showWaitPage();
 
-	var editorDocument;
+	//var editorDocument;
 	var selection = '';
 
 
