@@ -6,8 +6,27 @@ $(document).ready( function() {
 	$('iframe#editorContent').load(function() {
 
 		/**
+		 *	Creates list at cursor position 
+		 */
+		
+		createList = function() {
+			var text = rangy.getSelection(editorIframe);
+			var textNode = text.focusNode;
+			var offset = text.focusOffset;
+			if (textNode.textContent === "") {
+				text.focusNode.textContent = '<ul><li> </li></ul>';
+			} else {
+				text.focusNode.textContent = [text.focusNode.textContent.slice(0, offset), '<ul><li> </li></ul>', text.focusNode.textContent.slice(offset)].join('');
+			}
+			replaceTags('ul');
+			replaceTags('li');
+		}
+		
+		
+		/**
 		 *	Surrounds text (selected by user) with tags (<tag>text</tag>) 
 		 */
+		
 		formatText = function(tag) {
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
@@ -22,7 +41,7 @@ $(document).ready( function() {
 					return;
 				} else 
 				if (start > end) {
-					var cosiek = start;
+					var cosiek = start; 
 					start = end;
 					end = cosiek;
 				}
@@ -56,60 +75,41 @@ $(document).ready( function() {
 			}
 			
 			var parentNode = text.anchorNode.parentNode;
-			if (checkChildren(parentNode, tag)) {
+			if (checkChildes(parentNode, tag)) {
 				startInTag = true;
 			}
-			if (text.anchorNode.previousSibling != null) {
-				if (checkChildren(text.anchorNode.previousSibling, tag)) {
-					startInTag = true;
-				}
-			}
-
-			if (text.anchorNode.nextSibling != null) {
-				if (checkChildren(text.anchorNode.nextSibling, tag)) {
-					startInTag = true;
-				}
-			}	
 
 			parentNode = text.focusNode.parentNode;
 			
-			if (checkChildren(parentNode, tag)) {
+			if (checkChildes(parentNode, tag)) {
 				endInTag = true;
 			}
 			
-			if (text.focusNode.previousSibling != null) {
-				if (checkChildren(text.focusNode.previousSibling, tag)) {
-					endInTag = true;
-				}
-			}
-
-			if (text.focusNode.nextSibling) {
-				if (checkChildren(text.focusNode.nextSibling, tag)) {
-					endInTag = true;
-				}
-			}
-			
 			if (startInTag) {
-				rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '</' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+				rangy.getSelection(editorIframe).anchorNode.textContent = [text.anchorNode.textContent.slice(0, start), '</' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
 			} else {
-				rangy.getSelection(editorIframe).anchorNode.nodeValue = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+				rangy.getSelection(editorIframe).anchorNode.textContent = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
 			}
 			
 			if (endInTag) {
 				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 4), '<' + tag + '>', text.focusNode.textContent.slice(end + 4)].join('');
+					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + 4), '<' + tag + '>', text.focusNode.textContent.slice(end + 4)].join('');
 				} else {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
 				}
 			} else {
 				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
 				} else {
-					rangy.getSelection(editorIframe).focusNode.nodeValue = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
 				}
 			}
 			replaceTags(tag);
-			clearEmptyTags(tag);
+			var flag = -1;
+			while (flag == 1) {
+				flag = clearEmptyTags(tag);
+			}
+			
 			var bodyAfterTagging = editorBody.innerHTML;
 			console.log('After tagging: ' + bodyAfterTagging);
 			propagateChanges(bodyBeforeTagging, bodyAfterTagging, tag);
@@ -145,30 +145,39 @@ $(document).ready( function() {
 		replaceTags = function(tag) {
 			console.log('Replacing Tags');
 			var text = editorBody.innerHTML;
-			var toReplaceOpeneningTag = '&lt;' + tag + '&gt;';
+			var toReplaceOpeningTag = '&lt;' + tag + '&gt;';
 			var toReplaceClosingTag = '&lt;/' + tag + '&gt;';
 			var openingTag = '<' + tag + '>';
 			var closingTag = '</' + tag + '>';
 			var regexStart = new RegExp(openingTag, 'g');
 			var regexEnd = new RegExp(closingTag, 'g');
 			var regexAll = new RegExp('(<' + tag + '>|</' + tag + '>)', 'g');
-			var startIndex = text.indexOf(toReplaceOpeneningTag);
+			var startIndex = text.indexOf(toReplaceOpeningTag);
 			var endIndex = text.indexOf(toReplaceClosingTag);
 			if (startIndex == -1) {
 				startIndex = text.indexOf(toReplaceClosingTag, endIndex + 1);
+				toReplaceOpeningTag = toReplaceClosingTag;
+				openingTag = closingTag;
 			}
 			if (endIndex == -1) {
-				endIndex = text.indexOf(toReplaceOpeneningTag, startIndex + 1);
+				endIndex = text.indexOf(toReplaceOpeningTag, startIndex + 1);
+				toReplaceClosingTag = toReplaceOpeningTag;
+				closingTag = openingTag;
 			}
 			if (startIndex > endIndex) {
 				var tmp = startIndex;
 				startIndex = endIndex;
 				endIndex = tmp;
 			}
-			var selectedText = text.substring(startIndex, endIndex + 10);
+			var offset = 9 + tag.length;
+			var selectedText = text.substring(startIndex, endIndex + offset);
 			var newSelectedText = selectedText;
-			newSelectedText = newSelectedText.replace(toReplaceOpeneningTag, openingTag);
+			newSelectedText = newSelectedText.replace(regexAll, function($1) {
+			     return $1 === '<' + tag + '>' ? '</' + tag + '>' : '<' + tag + '>';
+			});
+			newSelectedText = newSelectedText.replace(toReplaceOpeningTag, openingTag);
 			newSelectedText = newSelectedText.replace(toReplaceClosingTag, closingTag);
+			
 			editorBody.innerHTML = editorBody.innerHTML.replace(selectedText, newSelectedText);
 		}
 
@@ -230,6 +239,10 @@ $(document).ready( function() {
 	
 	$('#alignRight').on('click', function() {
 		setAlignment('right');
+	});
+	
+	$('#list').on('click', function() {
+		createList();
 	});
 
 });
