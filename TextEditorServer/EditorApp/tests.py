@@ -256,8 +256,7 @@ class TestUI(unittest.TestCase):
 		logger.debug('End TestUI::testCreateUser.')
 
 	def testAccount(self):
-		# for sure
-		Doc.objects.delete()
+		Doc.objects(name=DOC_NAME)[0].delete() #strange bug happens when full collection from db is deleted :|
 		logger.debug('Start TestUI::testAccount.')
 		USER_NAME = 'testLogin'
 		driver = self.driver
@@ -295,7 +294,7 @@ class TestUI(unittest.TestCase):
 		driver.find_element_by_id("saveDocumentButtonAtStart").click()
 		time.sleep(10)
 		logger.debug('Critical point of TestUI::testAccount.')
-		doc = Doc.objects()[0]
+		doc = Doc.objects(name=PRIVATE_DOC_NAME)[0]
 		self.assertEqual(doc.name, PRIVATE_DOC_NAME)
 		self.assertTrue(doc.priv)
 		driver.get(self.base_url)
@@ -324,7 +323,6 @@ class TestUI(unittest.TestCase):
 		driver.find_element_by_name("press").click()
 		time.sleep(5)
 		self.assertEqual('test.odt', driver.find_element_by_css_selector("td").text)
-
 
 	def tearDown(self):
 		self.driver.quit()
