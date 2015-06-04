@@ -214,6 +214,7 @@ $(document).ready( function() {
 				}
 			});
 			propagateChanges();
+			bodyBeforeOperation = editorBody.innerHTML;
 		}
 	});
 
