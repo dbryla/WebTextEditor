@@ -75,13 +75,13 @@ $(document).ready( function() {
 			}
 			
 			var parentNode = text.anchorNode.parentNode;
-			if (checkChildes(parentNode, tag)) {
+			if (checkChildren(parentNode, tag)) {
 				startInTag = true;
 			}
 
 			parentNode = text.focusNode.parentNode;
 			
-			if (checkChildes(parentNode, tag)) {
+			if (checkChildren(parentNode, tag)) {
 				endInTag = true;
 			}
 			
