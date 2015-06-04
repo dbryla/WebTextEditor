@@ -5,6 +5,8 @@ $(document).ready( function() {
 
 	$('iframe#editorContent').load(function() {
 
+		var re = /\<span class=\"rangySelectionBoundary.*?\<\/span\>/g;
+
 		socket.on('message', function(data) {
 			console.log('Recieved message');
 			console.log(data);
@@ -32,6 +34,13 @@ $(document).ready( function() {
 				text = operation.text;
 				pos = operation.pos;
 				var savedSel = rangy.saveSelection(editorIframe);
+				var match;
+				while ((match = re.exec(editorBody.innerHTML)) !== null) {
+					if (pos > match.index) {
+						console.log("Moving pos from " + pos + " to " + pos + match[0].length);
+						pos += match[0].length;
+					}
+				}
 				var savedSelActiveElement = document.activeElement;
 				currentContent = editorBody.innerHTML;
 				console.log('Recieved message: ' + data);
@@ -48,8 +57,6 @@ $(document).ready( function() {
 					editorBody.innerHTML = currentContent.substring(0, pos) + currentContent.substring(pos + length, currentContent.length);
 					console.log('Removed.. new content: ' + editorBody.innerHTML);			
 				}
-				//console.log(document.activeElement);
-				//console.log(editorDocument.activeElement);
 				console.log('Restoring selection!');
 				rangy.restoreSelection(savedSel, true);
 				window.setTimeout(function() {
