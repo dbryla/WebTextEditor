@@ -3,17 +3,21 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Upload document</title>	
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/login.css">
 	</head>
 	<body>
-		<form action="{% url "upload" %}" method="post" enctype="multipart/form-data">
-			{% csrf_token %}
-			<p style="color:red">{{ form.error }}</p>
-			<p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
-			<p>
-				{{ form.docfile.errors }}
-				{{ form.docfile }}
-			</p>
-			<p><input type="submit" name="press" value="Upload" /></p>
-		</form>
+		<div class="greenElements">
+	  		<h1>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</h1>
+			<form action="{% url "upload" %}" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<p style="color:red">{{ form.error }}</p>
+				<p>
+					{{ form.docfile.errors }}
+					{{ form.docfile }}
+				</p>
+				<br/>
+				<p><input type="submit" name="press" value="Upload" /></p>
+			</form>
+		</div>
 	</body>
 </html>

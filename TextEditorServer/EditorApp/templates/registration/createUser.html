@@ -1,24 +1,35 @@
-{% block content %}
+<html>
+	<head>
+		<title>Register</title>
+		<meta charset="UTF-8">
 
-<form method="post" action="">
-    {% csrf_token %}
-    <table>
-	<tr>
-	    <td>{{ form.username.label_tag }}</td>
-	    <td>{{ form.username }}</td>
-	</tr>
-	<tr>
-	    <td>{{ form.password.label_tag }}</td>
-	    <td>{{ form.password }}</td>
-	</tr>
-	</table>
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/login.css">
 
-	{% if error %}
-		<p style="color:red">{{error}}</p>
-	{% endif %}
+	</head>
+	<body >
+		<div class='greenElements'>
+		  		
+		  	<h1>Register</h1>
+			<form method="post" action="">
+			    {% csrf_token %}
+			    <table>
+				<tr>
+				    <td>{{ form.username.label_tag }}</td>
+				    <td>{{ form.username }}</td>
+				</tr>
+				<tr>
+				    <td>{{ form.password.label_tag }}</td>
+				    <td>{{ form.password }}</td>
+				</tr>
+				</table>
 
-    <input type="submit" value="Create new user account" />
+				{% if error %}
+					<p style="color:red">{{error}}</p>
+				{% endif %}
 
-</form>
+			    <input type="submit" value="Register" />
 
-{% endblock %}
+			</form>
+		</div>
+	</body>
+</html>
