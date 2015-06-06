@@ -133,6 +133,8 @@ $(document).ready( function() {
 				
 		insertAtCaret = function(imgName, path) {
 			console.log('Inserting image ' + path + imgName);
+			var bodyBeforeTagging = editorBody.innerHTML;
+			console.log('Before inserting: ' + bodyBeforeTagging);
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
 			var s = '<img src=' + path + imgName + '></img>';
@@ -142,7 +144,11 @@ $(document).ready( function() {
 				text.anchorNode.nodeValue = text.anchorNode.nodeValue.slice(0,start) + s + text.anchorNode.nodeValue.slice(start);
 			}
 			replaceImgTag();
-		    return false;
+			var bodyAfterTagging = editorBody.innerHTML;
+			console.log('After tagging: ' + bodyAfterTagging);
+			propagateChanges(bodyBeforeTagging, bodyAfterTagging, 'img');
+			bodyBeforeOperation = bodyAfterTagging;
+		    	return false;
 		}
 		
 		replaceImgTag = function() {

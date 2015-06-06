@@ -22,17 +22,36 @@ $(document).ready( function() {
 			replaceTags('li');
 		}
 		
+		/**
+		 *	Changes font size 
+		 */
+
+		changeFontSize = function() {
+			var size = document.getElementById('fontSize').selectedOptions[0].label;
+			if (size == 0) {
+				return;
+			}
+			formatText('font', size);
+			$('#fontSize').val(0);
+		}
 		
 		/**
 		 *	Surrounds text (selected by user) with tags (<tag>text</tag>) 
 		 */
 		
-		formatText = function(tag) {
+		formatText = function(tag, size) {
 			var text = rangy.getSelection(editorIframe);
 			var start = text.anchorOffset;
 			var end = text.focusOffset;
 			var startInTag = false;
 			var endInTag = false;
+			if (size === undefined) {
+				var fontStartTag = '';
+				var fontEndTag = '';
+			} else {
+				var fontStartTag = '<font>';
+				var fontEndTag = '</font>';
+			}
 			var bodyBeforeTagging = editorBody.innerHTML;
 			console.log('Before tagging: ' + bodyBeforeTagging);
 
@@ -54,6 +73,11 @@ $(document).ready( function() {
 				parentANode = text.anchorNode;
 			}
 			var startFirst = true;
+			if (parentANode.size === undefined) {
+				var parentSize = '';
+			} else {
+				var parentSize = " size = '" + parentANode.size + "'";
+			}
 			
 			$(parentANode).siblings().andSelf().each(function() {
 				if (this === text.anchorNode) {
@@ -86,26 +110,38 @@ $(document).ready( function() {
 			}
 			
 			if (startInTag) {
-				rangy.getSelection(editorIframe).anchorNode.textContent = [text.anchorNode.textContent.slice(0, start), '</' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+				if (fontStartTag === undefined) {
+					rangy.getSelection(editorIframe).anchorNode.textContent = [text.anchorNode.textContent.slice(0, start), '</' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
+				} else {
+					rangy.getSelection(editorIframe).anchorNode.textContent = [text.anchorNode.textContent.slice(0, start), fontStartTag, text.anchorNode.textContent.slice(start)].join('');
+				}
 			} else {
 				rangy.getSelection(editorIframe).anchorNode.textContent = [text.anchorNode.textContent.slice(0, start), '<' + tag + '>', text.anchorNode.textContent.slice(start)].join('');
 			}
 			
 			if (endInTag) {
 				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + 4), '<' + tag + '>', text.focusNode.textContent.slice(end + 4)].join('');
+					if (fontEndTag === undefined) {
+						rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + tag.length + 3), '<' + tag + '>', text.focusNode.textContent.slice(end + tag.length + 3)].join('');
+					} else {
+						rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + tag.length + 2), fontEndTag, text.focusNode.textContent.slice(end + tag.length + 2)].join('');
+					}
 				} else {
-					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+					if (fontEndTag === undefined) {
+						rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end), '<' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
+					} else {
+						rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end), fontEndTag, text.focusNode.textContent.slice(end)].join('');
+					}
 				}
 			} else {
 				if (text.anchorNode === text.focusNode) {
-					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + 3), '</' + tag + '>', text.focusNode.textContent.slice(end + 3)].join('');
+					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end + tag.length + 2), '</' + tag + '>', text.focusNode.textContent.slice(end + tag.length + 2)].join('');
 				} else {
 					rangy.getSelection(editorIframe).focusNode.textContent = [text.focusNode.textContent.slice(0, end), '</' + tag + '>', text.focusNode.textContent.slice(end)].join('');	
 				}
 			}
-			replaceTags(tag);
-			var flag = -1;
+			replaceTags(tag, size);
+			var flag = 1;
 			while (flag == 1) {
 				flag = clearEmptyTags(tag);
 			}
@@ -126,8 +162,13 @@ $(document).ready( function() {
 		 *	Removes empty tags from HTML content of document (e.g. <b></b>) which happens when user formats selected text and then unformats it.
 		 */
 		clearEmptyTags = function(tag) {
+			if (tag != 'font') {
+				var att = '';
+			} else {
+				var att = " size='[0-9][0-9]?'";
+			}
 			console.log('Removing empty tags: ' + tag + 'from: ' + editorBody.innerHTML);
-			var regex = new RegExp('<' + tag + '><\/' + tag + '>', 'g');
+			var regex = new RegExp('<' + tag + att + '><\/' + tag + '>', 'g');
 			editorBody.innerHTML = editorBody.innerHTML.replace(regex, '');
 			console.log('After removing: ' + editorBody.innerHTML);
 		}
@@ -142,12 +183,15 @@ $(document).ready( function() {
 		/**
 		 *	Replaces escaped tags (e.g. &lt;b&gt;) with proper HTML tag values (e.g. <b>)
 		 */
-		replaceTags = function(tag) {
+		replaceTags = function(tag, size) {
 			console.log('Replacing Tags');
 			var text = editorBody.innerHTML;
 			var toReplaceOpeningTag = '&lt;' + tag + '&gt;';
 			var toReplaceClosingTag = '&lt;/' + tag + '&gt;';
 			var openingTag = '<' + tag + '>';
+			if (size != undefined) {
+				var fontOpeningTag = '<' + tag + " size='" + size + "'>";
+			}
 			var closingTag = '</' + tag + '>';
 			var regexStart = new RegExp(openingTag, 'g');
 			var regexEnd = new RegExp(closingTag, 'g');
@@ -173,9 +217,13 @@ $(document).ready( function() {
 			var selectedText = text.substring(startIndex, endIndex + offset);
 			var newSelectedText = selectedText;
 			newSelectedText = newSelectedText.replace(regexAll, function($1) {
-			     return $1 === '<' + tag + '>' ? '</' + tag + '>' : '<' + tag + '>';
+				return $1 === '<' + tag + '>' ? '</' + tag + '>' : '<' + tag + '>';
 			});
-			newSelectedText = newSelectedText.replace(toReplaceOpeningTag, openingTag);
+			if (size === undefined) {
+				newSelectedText = newSelectedText.replace(toReplaceOpeningTag, openingTag);
+			} else {
+				newSelectedText = newSelectedText.replace(toReplaceOpeningTag, fontOpeningTag);
+			}
 			newSelectedText = newSelectedText.replace(toReplaceClosingTag, closingTag);
 			
 			editorBody.innerHTML = editorBody.innerHTML.replace(selectedText, newSelectedText);

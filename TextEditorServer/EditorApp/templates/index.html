@@ -118,6 +118,20 @@
 		<li><a id="localSave" style="display: none;"><i class="fa fa-floppy-o"></i> Local Save</a></li>
 		<li ><a href="#"  data-reveal-id="linkUploadModal" data-animation="fadeAndPop" id="image"  ><i class="fa fa-picture-o"></i></a></li>
 		<li><a id="emoticons" onclick="insertAtCaret('emotikon.jpeg', '{{STATIC_URL}}' + 'img/' )"><i class="fa fa-smile-o"></i></a></li>
+		<li><label for="fontSize">Select font size</label>
+			<select id="fontSize" onchange="changeFontSize();">
+			<option value="0" selected = "true">Font size</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="6">6</option>
+			<option value="8">8</option>
+			<option value="12">12</option>
+			<option value="16">16</option>
+			<option value="24">24</option>
+			<option value="48">48</option>
+			<option value="72">72</option>
+			</select></li>
 	</ul>
 	<br/>
 	<div>
