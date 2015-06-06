@@ -112,6 +112,11 @@ $(document).ready( function() {
 			console.log('Selected text: ' + selection);			
 		});
 
+		$(editorIframe).on('mouseup', function() {
+			selection = rangy.getSelection(editorIframe).toHtml();
+			console.log('Selected text: ' + selection);			
+		});
+
 
 		/**
 		 *	Prepares and sends message on socket with information about text to be removed from document on specified position.
@@ -195,12 +200,24 @@ $(document).ready( function() {
 				console.log('enter');
 				if (selection.length > 1) {
 					//replaces selection with new line
-					//TODO: fix selection ending with the end of line
 					//TODO: fix selection of single line
-					//TODO: fix selection starting with start of line <- big problem since <p> after selecton dissapear
-					var text = bodyBeforeOperation.substring(index, index + changeLength + 7);
-					sendRemoveText(documentId, text, index);
-					sendInsertText(documentId, '</p><p>', index);
+					//TODO: fix selection starting with start of line and ending just before space <- big problem since <p> after selecton dissapear
+					//var text = bodyBeforeOperation.substring(index, index + changeLength + 7);
+					//console.log(text);
+					bodyBeforeOperation = bodyBeforeOperation.substring(0, index) + bodyBeforeOperation.substring(index + selection.length);
+					changeLength = Math.abs(bodyBeforeOperation.length - editorBody.innerHTML.length);
+					console.log(bodyBeforeOperation);
+					console.log(editorBody.innerHTML);
+					console.log(changeLength);
+					sendRemoveText(documentId, selection, index);
+					index = bodyBeforeOperation.indexOfFirstDifference(editorBody.innerHTML);
+					if (changeLength === 11) {
+						sendInsertText(documentId, '<br></p><p>', index);
+					} else if (changeLength === 7) {
+						sendInsertText(documentId, '</p><p>', index);
+					} else if (changeLength === 15) {
+						sendInsertText(documentId, '<br></p><p><br>', index - 1);
+					}
 				} else {
 					//simple new line add
 					var text = editorBody.innerHTML.substring(index, index + changeLength);
@@ -247,7 +264,6 @@ $(document).ready( function() {
 					}
 				} else {
 					//simple remove of whole selection
-					//TODO: fix selection starting with start of line
 					var text = bodyBeforeOperation.substring(index, index + changeLength);
 					sendRemoveText(documentId, text, index);
 				}
