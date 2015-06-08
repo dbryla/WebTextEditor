@@ -358,8 +358,14 @@ $(document).ready( function() {
 
 	$('#linkSubmitButton').on('click', function() {
 		var link = $('#linkInputValue').val();
-		insertAtCaret(link, '');
+		insertAtCaret(linkid_docfile, '');
 		$('#linkInputValue').val('');
 		$('#linkUploadModalTrigger').trigger('click');
 	});
+
+	insertImage = function(path) {
+		var fileName = document.getElementById("id_docfile").files[0].name;
+		console.log("Inserting image " + fileName);
+		insertAtCaret(fileName, path);
+	}
 });

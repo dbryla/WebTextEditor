@@ -57,18 +57,11 @@
 				<li><a id="newDocumentMenu" href="#" onclick="newDocAtStart()"><i class="fa fa-file-text-o"></i> New document</a></li>
 				<li><a id="import" href="upload"><i class="fa fa-upload"></i> Import</a></li>
 				<li><a id="export" href="#"><i class="fa fa-file-pdf-o"></i> Export to PDF</a></li>
-				<li><a href="#" id="fileUpload" data-reveal-id="fileUploadModal" data-animation="fadeAndPop"><i class="fa fa-upload"></i> Upload</a></li>
+				<li><a href="#" id="fileUpload" data-reveal-id="fileUploadModal" data-animation="fadeAndPop"><i class="fa fa-upload"></i> Upload image</a></li>
 				<li><a id="documentListButton" href="#" data-reveal-id="fileListModal" data-animation="fadeAndPop">
 				<i class="fa fa-list-alt"></i> Documents list</a></li>
 			</ul>
 		</li>
-		<!--li><a><span class="icon"></span>Edit</a> doesn't work
-			<ul>
-				<li><a><i class="fa fa-clipboard"></i> Paste</a></li>
-				<li><a><i class="fa fa-download"></i> Cut</a></li>
-				<li><a><i class="fa fa-files-o"></i> Copy</a></li> 
-			</ul>
-		</li-->
 		<li><a id='accounts'><span class="icon"></span>Accounts</a>
 			<ul>
 				<li><a href="createUser/"><i class="fa fa-user-plus"></i> Create</a></li>
@@ -172,7 +165,7 @@
 		<button id="saveDocumentButtonAtStart" class="medium green">Save</button>
 		<button class="medium" onclick="swapWindows()">Cancel</button>
 		<input type="checkbox" id="privateFlagAtStart">Private document</input>
-		<a id="showFileNameModalAtStartTrigger" data-reveal-id="fileNameModalAtStart" data-closeonbackgroundclick="false"></a>
+		<a id="showFileNameModalAtStartTrigger" data-revMEDIA_ROOTeal-id="fileNameModalAtStart" data-closeonbackgroundclick="false"></a>
 	</div>
 	<div id="saveGDriveWindow" class="reveal-modal">
 		<label for="documentName">Document name:</label>
@@ -187,7 +180,7 @@
 			<form action="{% url "upload" %}" method="post" enctype="multipart/form-data">
 				{% csrf_token %}
 				 <input id="id_docfile" name="docfile" type="file" />
-				 <button class="medium"  name="press" value="Upload" type="submit">Submit</button>
+				 <button class="medium"  name="press" value="Upload" type="submit" onclick="insertImage('{{STATIC_URL}}media/')">Submit</button>
 			</form>
 		</div>
 	</div>

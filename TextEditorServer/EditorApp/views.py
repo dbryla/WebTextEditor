@@ -38,7 +38,7 @@ def logoutUser(request):
 
 def saveFile(file_struct):
     file_name = file_struct._name
-    with io.open('media/' + file_name, 'wb') as file:
+    with io.open('EditorApp/static/media/' + file_name, 'wb') as file:
         logger.info('Saving file ' + file_name)
         file.write(file_struct.file.getvalue())
     return file_name
@@ -52,9 +52,9 @@ def upload(request):
             if request.FILES['docfile'].content_type ==  u'application/vnd.oasis.opendocument.text':
                 file_name = saveFile(request.FILES['docfile'])
                 logger.info('Converting file ' + file_name)
-                content = subprocess.check_output(['OdtConverter/odt2html', '-x', 'OdtConverter/odt2html.xsl', 'media/' + file_name])
+                content = subprocess.check_output(['OdtConverter/odt2html', '-x', 'OdtConverter/odt2html.xsl', 'EditorApp/static/media/' + file_name])
                 logger.info('Deleting file ' + file_name)
-                os.remove('media/' + file_name)
+                os.remove('EditorApp/static/media/' + file_name)
                 logger.info('Saving imported document ' + file_name)
                 create_document(None, file_name, content)
             elif request.FILES['docfile'].content_type[:5] == u'image':
