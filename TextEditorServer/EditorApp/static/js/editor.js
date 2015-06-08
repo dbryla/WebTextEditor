@@ -358,7 +358,7 @@ $(document).ready( function() {
 
 	$('#linkSubmitButton').on('click', function() {
 		var link = $('#linkInputValue').val();
-		insertAtCaret(linkid_docfile, '');
+		insertAtCaret(link, '');
 		$('#linkInputValue').val('');
 		$('#linkUploadModalTrigger').trigger('click');
 	});
