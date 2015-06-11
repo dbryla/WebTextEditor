@@ -344,10 +344,8 @@ $(document).ready( function() {
 	});
 
 	$('#export').on('click', function() {
-		var name  = $('#documentNameHeader').text() + '.pdf'
-		var text = encodeURIComponent(editorBody.innerHTML.replace('<img src=\"/static', '<img src=\"EditorApp/static'));
-		var data = "name=" + name + "&text=" + text; 
-		var url = "/download/?"+data;
+		var name  = $('#documentNameHeader').text() + '.pdf' 
+		var url = "/download/?documentId=" + documentId;
 		console.log('Exporting ' + name);
 		var link = document.createElement('a');
  		document.body.appendChild(link);

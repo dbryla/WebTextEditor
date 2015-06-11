@@ -9,6 +9,8 @@ import io
 import os
 from db_manager import create_document
 import xhtml2pdf.pisa as pisa
+from mongoengine.django.shortcuts import get_document_or_404
+from models import Document
 
 try:
     import StringIO
@@ -70,16 +72,24 @@ def upload(request):
         form = FileForm() # A empty, unbound form
     return render(request, 'upload.html', {'form': form})
 
+def get_user_permissions(request):
+    user_permissions = []
+    if not request.user.is_anonymous():
+        for permission in request.user.user_permissions:
+            user_permissions.append(permission._DBRef__id)
+    return user_permissions
+
 def download(request):
     if request.method == 'GET':
-        name = request.GET.get('name')
-        logger.debug('Exporting ' + name)
-        result = StringIO()
-        pdf = pisa.CreatePDF(StringIO(request.GET.get('text')), result)
-        if not pdf.err:
-            response = StreamingHttpResponse(result.getvalue(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment;filename=' + name
-            logger.debug('Document ' + name + ' was exported successfully')
-            return response 
-        logger.debug('Failed in export document ' + name)
+        document = get_document_or_404(Document, id = request.GET.get('documentId'))
+        if document.priv == False or document.id in get_user_permissions(request):
+            logger.debug('Exporting ' + document.name)
+            result = StringIO()
+            pdf = pisa.CreatePDF(StringIO(document.text.replace('<img src=\"/static', '<img src=\"EditorApp/static')), result)
+            if not pdf.err:
+                response = StreamingHttpResponse(result.getvalue(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment;filename=' + document.name.replace(' ', '_') + '.pdf'
+                logger.debug('Document ' + document.name + ' was exported successfully')
+                return response 
+            logger.debug('Failed in export document ' + document.name)
     return HttpResponseRedirect('/')
