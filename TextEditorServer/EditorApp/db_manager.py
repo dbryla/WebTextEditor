@@ -19,8 +19,8 @@ def remove_text(document, text, position):
 	logger.info("Document saved")
 
 def create_document(request, name, text, priv=False):
-	if request.user.is_anonymous():
-		priv = False
+	if request and request.user.is_anonymous():
+	 	priv = False
 	logger.info("Creating document " + name + ' in private mode: ' + str(priv))
 	document = Document(name = name)
 	document.last_change = datetime.datetime.now()
