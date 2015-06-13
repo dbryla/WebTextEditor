@@ -8,6 +8,7 @@ $(document).ready( function() {
 	Offline.on('down', function () {
         console.log('Going offline!');
         console.log(socket);
+        alert('You are going into offline mode. Your changes to the document will be propagated once you go online!');
         offline();
         noDocumentReplace = true;
     });
@@ -15,6 +16,7 @@ $(document).ready( function() {
     Offline.on('up', function () {
         console.log('Going back online!!');
         console.log(socket);
+        alert('You are going back online. Your changes will now be propagated to other users!');
         offlineMode = false;
         socket.connect('http://127.0.0.1');
 		if (documentId === undefined) {
